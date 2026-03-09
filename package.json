@@ -5,6 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "db:import": "psql -U postgres -d flexy-booker -f database/dump.sql",
     "build": "tsc",
     "start": "node dist/server.js"
   },
