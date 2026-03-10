@@ -6,7 +6,9 @@ const router = Router();
 
 router.post("/sign-up", async (req: Request, res: Response) => {
   try {
-    const { userName, email, password } = req.body;
+   const { userName, email, password, address, phoneNumber, userType } = req.body;
+
+const finalUserType = userType || "cliente";
 
     if (!userName || !email || !password) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -15,12 +17,19 @@ router.post("/sign-up", async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const query = `
-      INSERT INTO users (name, email, password, user_type)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO users (name, email, password, user_type, address,phone_number)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, name, email
     `;
 
-    const values = [userName, email, hashedPassword, "cliente"];
+    const values = [
+      userName,
+      email,
+      hashedPassword,
+      finalUserType,
+      address,
+      phoneNumber,
+    ];
     const result = await pool.query(query, values);
 
     const user = result.rows[0];
@@ -32,13 +41,11 @@ router.post("/sign-up", async (req: Request, res: Response) => {
         email: user.email,
       },
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 router.post("/sign-in", async (req: Request, res: Response) => {
   try {
@@ -59,14 +66,13 @@ router.post("/sign-in", async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Incorrect password" });
     }
 
-   res.status(200).json({
-    token: "faketoken",
-    user: {
+    res.status(200).json({
+      token: "faketoken",
+      user: {
         userName: user.name,
         email: user.email,
-    },
-})
-
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
