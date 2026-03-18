@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: flexy_booker
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  flyway:
+    image: flyway/flyway
+    command: -url=jdbc:postgresql://postgres:5432/flexy_booker -user=postgres -password=postgres migrate
+    volumes:
+      - ./src/db/migration:/flyway/sql
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
