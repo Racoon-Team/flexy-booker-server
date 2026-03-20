@@ -24,3 +24,11 @@ export const findUserByEmail = async (email: string) => {
   const query = "SELECT * FROM users WHERE email = $1";
   return await pool.query(query, [email]);
 };
+
+export const updateSessionToken = async (
+  userId: number,
+  token: string | null,
+) => {
+  const query = "UPDATE users SET session_token = $1 WHERE id = $2";
+  return await pool.query(query, [token, userId]);
+};
