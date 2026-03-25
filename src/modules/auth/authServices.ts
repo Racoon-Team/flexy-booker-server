@@ -33,8 +33,17 @@ export const signUp = async (data: SignUpDataTransferObject) => {
 
   await usersRepository.updateSessionToken(user.id, token);
 
-  const { password: _, ...userWithoutPassword } = user;
-return { ...userWithoutPassword, token };
+ 
+  return {
+    token,
+    user: {
+      userId: user.id,
+      userName: user.name,
+      email: user.email,
+      authority: [finalUserType],
+      avatar: "",
+    },
+  };
 };
 
 export const signIn = async (data: SignInDataTransferObject) => {
@@ -62,8 +71,16 @@ export const signIn = async (data: SignInDataTransferObject) => {
 
   await usersRepository.updateSessionToken(user.id, token);
 
- const { password: _, ...userWithoutPassword } = user;
-return { ...userWithoutPassword, token };
+  return {
+    token,
+    user: {
+      userId: user.id,
+      userName: user.name,
+      email: user.email,
+      authority: [user.user_type || "cliente"],
+      avatar: "",
+    },
+  };
 };
 
 export const signOut = async (userId: number) => {
