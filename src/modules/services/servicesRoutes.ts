@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { getServices } from "./servicesController";
+import * as servicesController from "./servicesController";
 
 const router = Router();
 
-router.get("/", getServices);
+router.get("/", servicesController.getServices);
+
+router.delete("/:id", servicesController.deleteService);
 
 export default router;
