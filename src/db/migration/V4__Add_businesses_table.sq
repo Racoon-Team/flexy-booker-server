@@ -5,3 +5,8 @@ CREATE TABLE businesses (
     category VARCHAR(255),
     description TEXT
 );
+
+INSERT INTO businesses (user_id, business_name, category, description)
+VALUES 
+(1, 'Discoteca MoonLight', 'Discoteca', 'Discoteca con música en vivo y reservas VIP'),
+(1, 'Club Eclipse', 'Bar Nocturno', 'Bar con ambiente lounge y DJ invitados');
