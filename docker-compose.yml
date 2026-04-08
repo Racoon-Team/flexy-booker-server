@@ -14,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
   flyway:
     image: flyway/flyway
-    command: -url=jdbc:postgresql://host.docker.internal:5432/flexy-booker -user=postgres -password=13752113 migrate
+    command: -url=jdbc:postgresql://host.docker.internal:5432/flexy-booker -user=postgres -password=13832041 -baselineOnMigrate=true -baselineVersion=3 migrate
     volumes:
       - ./src/db/migration:/flyway/sql
 
