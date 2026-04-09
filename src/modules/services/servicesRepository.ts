@@ -28,9 +28,15 @@ export const createService = async (data: {
   description?: string;
   price?: number;
   schedule: string[];
+  custom_fields?: object[];
 }) => {
   const [newService] = await db("services")
-    .insert(data)
+    .insert({
+      ...data,
+      custom_fields: data.custom_fields
+        ? JSON.stringify(data.custom_fields)
+        : JSON.stringify([]),
+    })
     .returning([
       "id",
       "business_id",
@@ -39,6 +45,7 @@ export const createService = async (data: {
       "price",
       "schedule",
       "is_active",
+      "custom_fields",
       "created_at",
     ]);
 

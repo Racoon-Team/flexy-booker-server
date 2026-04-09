@@ -15,6 +15,7 @@ export const createService = async (data: {
   description?: string;
   price?: number;
   schedule: string[];
+  custom_fields?: object[];
 }) => {
   if (!data.name || data.name.trim() === "") {
     throw new Error("Service name is required");
