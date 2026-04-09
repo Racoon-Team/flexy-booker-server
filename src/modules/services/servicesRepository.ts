@@ -21,3 +21,26 @@ export const getServices = async () => {
 export const deleteService = async (id: number) => {
   await db("services").where({ id }).del();
 };
+
+export const createService = async (data: {
+  business_id: number;
+  name: string;
+  description?: string;
+  price?: number;
+  schedule: string[];
+}) => {
+  const [newService] = await db("services")
+    .insert(data)
+    .returning([
+      "id",
+      "business_id",
+      "name",
+      "description",
+      "price",
+      "schedule",
+      "is_active",
+      "created_at",
+    ]);
+
+  return newService;
+};
