@@ -1,12 +1,12 @@
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
 
-
 import todoRoutes from "./modules/todo/todo.routes";
 import userRoutes from "./modules/users/usersRoutes";
 import authRoutes from "./modules/auth/authRoutes";
 import servicesRoutes from "./modules/services/servicesRoutes";
 import { dbReady } from "./server";
+import businessesRoutes from "./modules/businesses/businessesRoutes";
 
 const app: Application = express();
 
@@ -26,6 +26,7 @@ app.use("/api", todoRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/services", servicesRoutes);
+app.use("/api/businesses", businessesRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Flexy Booker API running" });
