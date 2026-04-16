@@ -15,5 +15,5 @@ export const getServices = async () => {
     )
     .orderBy("id");
 
- return rows;
+ return {rows};
 };
