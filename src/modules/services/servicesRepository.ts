@@ -11,9 +11,13 @@ export const getServices = async () => {
       "schedule",
       "is_active",
       "custom_fields",
-      "created_at"
+      "created_at",
     )
     .orderBy("id");
 
- return {rows};
+  return { rows };
+};
+
+export const deleteService = async (id: number) => {
+  await db("services").where({ id }).del();
 };
