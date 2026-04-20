@@ -13,13 +13,17 @@ async function startServer() {
     await db.raw("SELECT 1");
     dbReady = true;
     console.log("Database ready");
+
+
+    app.listen(PORT, () => {
+      console.log(`Server listening on port ${PORT}`);
+    });
+
   } catch (error) {
     console.error("Database not ready:", error);
+     await db.destroy();
+    process.exit(1); 
   }
-
-  app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
-  });
 }
 
 export { dbReady };
