@@ -144,6 +144,3 @@ vite.config.ts.timestamp-*
 .vite/
 
 .idea/
-
-# Docker
-docker-compose.yml
