@@ -7,6 +7,7 @@ import authRoutes from "./modules/auth/authRoutes";
 import servicesRoutes from "./modules/services/servicesRoutes";
 import { dbReady } from "./server";
 import businessesRoutes from "./modules/businesses/businessesRoutes";
+import { requireAuth } from "./middleware/authMiddleware";
 
 const app: Application = express();
 
@@ -25,8 +26,8 @@ app.use((req: Request, res: Response, next) => {
 app.use("/api", todoRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/services", servicesRoutes);
 app.use("/api/businesses", businessesRoutes);
+app.use("/api/services", requireAuth, servicesRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Flexy Booker API running" });
