@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-
+import { AppError } from "../utils/AppError";
 
 interface AuthRequest extends Request {
   user?: string | JwtPayload;
@@ -15,10 +15,7 @@ export const requireAuth = async (
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized - No token",
-      });
+      return next(new AppError("Unauthorized - No token", 401));
     }
 
     const token = authHeader.split(" ")[1];
@@ -31,11 +28,7 @@ export const requireAuth = async (
     req.user = decoded;
 
     next();
-
-  } catch {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized - Invalid token",
-    });
-  }
+  } catch (err) {
+  next(err);
+}
 };
