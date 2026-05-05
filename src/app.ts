@@ -26,7 +26,7 @@ app.use((req: Request, res: Response, next) => {
 app.use("/api", todoRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/businesses", businessesRoutes);
+app.use("/api/businesses", requireAuth, businessesRoutes);
 app.use("/api/services", requireAuth, servicesRoutes);
 
 app.get("/", (req: Request, res: Response) => {
