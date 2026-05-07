@@ -1,6 +1,6 @@
 import { db } from "../../db/knex";
 
-export const getServices = async () => {
+export const getServices = async (businessId: number) => {
   const rows = await db("services")
     .select(
       "id",
@@ -13,6 +13,7 @@ export const getServices = async () => {
       "custom_fields",
       "created_at",
     )
+    .where({ business_id: businessId })
     .orderBy("id");
 
   return { rows };

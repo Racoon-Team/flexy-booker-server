@@ -52,7 +52,7 @@ export const signIn = async (data: SignInDataTransferObject) => {
   const result = await usersRepository.findUserByEmail(email);
 
   if (result.rows.length === 0) {
-    throw new Error("User not found");
+    throw new Error("Invalid credentials");
   }
 
   const user = result.rows[0];
@@ -60,7 +60,7 @@ export const signIn = async (data: SignInDataTransferObject) => {
   const passwordMatch = await bcrypt.compare(password, user.password);
 
   if (!passwordMatch) {
-    throw new Error("Incorrect password");
+    throw new Error("Invalid credentials");
   }
 
   const token = jwt.sign(
