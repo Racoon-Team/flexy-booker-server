@@ -1,13 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { AppError } from "../utils/AppError";
 
-interface AuthRequest extends Request {
-  user?: string | JwtPayload;
-}
-
 export const requireAuth = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -29,6 +25,6 @@ export const requireAuth = async (
 
     next();
   } catch (err) {
-  next(err);
-}
+    next(new AppError("Unauthorized - Invalid token", 401));
+  }
 };

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { JwtPayload } from "jsonwebtoken";
 import * as authService from "./authServices";
 
 export const signUp = async (req: Request, res: Response) => {
@@ -23,7 +24,7 @@ export const signIn = async (req: Request, res: Response) => {
 
 export const signOut = async (req: Request, res: Response) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.user as JwtPayload;
     await authService.signOut(userId);
     res.status(200).json({ message: "Successfully logged out" });
   } catch (error) {

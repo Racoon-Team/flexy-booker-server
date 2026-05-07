@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "db:import": "psql -U postgres -d flexy-booker -f database/dump.sql",
+    "db:seed-admin": "ts-node-dev --transpile-only src/db/seedAdmin.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"

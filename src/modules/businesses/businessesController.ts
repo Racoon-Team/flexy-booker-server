@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
+import { JwtPayload } from "jsonwebtoken";
 import * as businessesServices from "./businessesServices";
 
 export const getMyBusiness = async (req: Request, res: Response) => {
   try {
-    const userId = Number(req.params.userId);
+    const { userId } = req.user as JwtPayload;
 
     const business = await businessesServices.getMyBusiness(userId);
     res.status(200).json(business);
