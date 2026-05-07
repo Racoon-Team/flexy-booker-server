@@ -17,6 +17,10 @@ export const createService = async (data: {
   schedule: string[];
   custom_fields?: object[];
 }) => {
+  if (!data.business_id) {
+    throw new Error("Business ID is required");
+  }
+
   if (!data.name || data.name.trim() === "") {
     throw new Error("Service name is required");
   }
@@ -25,5 +29,8 @@ export const createService = async (data: {
     throw new Error("At least one schedule slot is required");
   }
 
+  if (data.price !== undefined && data.price <= 0) {
+    throw new Error("Too small: expected number to be >0");
+  }
   return await servicesRepository.createService(data);
 };
