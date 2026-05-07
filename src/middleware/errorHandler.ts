@@ -1,19 +1,35 @@
 import { Request, Response, NextFunction } from "express";
-
-interface CustomError extends Error {
-  statusCode?: number;
-}
+import { AppError } from "../utils/AppError";
 
 export const errorHandler = (
-  err: CustomError,
+  err: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   console.error("ERROR:", err);
 
-  res.status(err.statusCode || 500).json({
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+    });
+  }
+
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code: string }).code === "23505"
+  ) {
+    return res.status(409).json({
+      success: false,
+      message: "A record with that value already exists",
+    });
+  }
+
+  res.status(500).json({
     success: false,
-    message: err.message || "Internal Server Error",
+    message: "Internal Server Error",
   });
 };
