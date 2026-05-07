@@ -1,14 +1,7 @@
 import * as servicesRepository from "./servicesRepository";
-import * as businessesRepository from "../businesses/businessesRepository";
 
-export const getServices = async (userId: number) => {
-  const business = await businessesRepository.findBusinessByUserId(userId);
-
-  if (!business) {
-    throw new Error("No business found for this user");
-  }
-
-  const result = await servicesRepository.getServices(business.id);
+export const getServices = async (search?: string) => {
+  const result = await servicesRepository.getServices(search);
   return result.rows;
 };
 
