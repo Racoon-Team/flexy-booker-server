@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import * as usersRepository from "../users/usersRepository";
 import { SignUpDataTransferObject, SignInDataTransferObject } from "../users/usersModel";
 import { env } from "../../config/env";
+import { AppError } from "../../utils/AppError";
 
 export const signUp = async (data: SignUpDataTransferObject) => {
   const { userName, email, password, address, phoneNumber, userType } = data;
@@ -52,7 +53,7 @@ export const signIn = async (data: SignInDataTransferObject) => {
   const result = await usersRepository.findUserByEmail(email);
 
   if (result.rows.length === 0) {
-    throw new Error("Invalid credentials");
+    throw new AppError("Invalid credentials", 401);
   }
 
   const user = result.rows[0];
@@ -60,7 +61,7 @@ export const signIn = async (data: SignInDataTransferObject) => {
   const passwordMatch = await bcrypt.compare(password, user.password);
 
   if (!passwordMatch) {
-    throw new Error("Invalid credentials");
+    throw new AppError("Invalid credentials", 401);
   }
 
   const token = jwt.sign(

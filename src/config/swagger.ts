@@ -117,7 +117,7 @@ const options: swaggerJsdoc.Options = {
           },
           responses: {
             200: { description: "Login successful", content: { "application/json": { schema: { $ref: "#/components/schemas/AuthResponse" } } } },
-            500: { description: "Invalid credentials", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+            401: { description: "Invalid credentials", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
           },
         },
       },
@@ -170,7 +170,7 @@ const options: swaggerJsdoc.Options = {
                     business_id: { type: "integer" },
                     name: { type: "string" },
                     description: { type: "string" },
-                    price: { type: "number", minimum: 0 },
+                    price: { type: "number", minimum: 0, exclusiveMinimum: true },
                     schedule: { type: "array", items: { type: "string" } },
                     custom_fields: { type: "array", items: { type: "object" } },
                   },
@@ -203,7 +203,7 @@ const options: swaggerJsdoc.Options = {
                   properties: {
                     name: { type: "string" },
                     description: { type: "string" },
-                    price: { type: "number", minimum: 0 },
+                    price: { type: "number", minimum: 0, exclusiveMinimum: true },
                     schedule: { type: "array", items: { type: "string" } },
                   },
                 },
