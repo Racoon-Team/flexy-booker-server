@@ -5,7 +5,7 @@ import todoRoutes from "./modules/todo/todo.routes";
 import userRoutes from "./modules/users/usersRoutes";
 import authRoutes from "./modules/auth/authRoutes";
 import servicesRoutes from "./modules/services/servicesRoutes";
-import { dbReady } from "./server";
+import { isDbReady } from "./db/dbState";
 import businessesRoutes from "./modules/businesses/businessesRoutes";
 import { requireAuth } from "./middleware/authMiddleware";
 import { AppError } from "./utils/AppError";
@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use((req: Request, res: Response, next) => {
-  if (!dbReady) {
+  if (!isDbReady()) {
     return next(new AppError("Database not ready", 500));
   }
   next();

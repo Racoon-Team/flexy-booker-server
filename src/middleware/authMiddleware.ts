@@ -1,13 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { AppError } from "../utils/AppError";
-
-interface AuthRequest extends Request {
-  user?: string | JwtPayload;
-}
+import { db } from "../db/knex";
 
 export const requireAuth = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -20,15 +17,21 @@ export const requireAuth = async (
 
     const token = authHeader.split(" ")[1];
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+
+    const user = await db("users")
+      .where({ id: decoded.userId })
+      .select("session_token")
+      .first();
+
+    if (!user || user.session_token !== token) {
+      return next(new AppError("Unauthorized - Session expired", 401));
+    }
 
     req.user = decoded;
 
     next();
   } catch (err) {
-  next(err);
-}
+    next(new AppError("Unauthorized - Invalid token", 401));
+  }
 };

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { JwtPayload } from "jsonwebtoken";
 import * as service from "./servicesServices";
 
 export const getServices = async (
@@ -7,7 +8,8 @@ export const getServices = async (
   next: NextFunction,
 ) => {
   try {
-    const servicios = await service.getServices();
+    const { userId } = req.user as JwtPayload;
+    const servicios = await service.getServices(userId);
     res.json(servicios);
   } catch (error) {
     next(error);

@@ -1,17 +1,17 @@
 import dotenv from "dotenv";
-import app from "./app";
-import { db } from "./db/knex";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
+import app from "./app";
+import { db } from "./db/knex";
+import { setDbReady } from "./db/dbState";
 
-let dbReady = false;
+const PORT = process.env.PORT || 3000;
 
 async function startServer() {
   try {
     await db.raw("SELECT 1");
-    dbReady = true;
+    setDbReady(true);
     console.log("Database ready");
 
 
@@ -26,5 +26,4 @@ async function startServer() {
   }
 }
 
-export { dbReady };
 startServer();
