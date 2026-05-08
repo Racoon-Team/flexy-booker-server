@@ -1,5 +1,6 @@
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
+import swaggerUi from "swagger-ui-express";
 
 import todoRoutes from "./modules/todo/todo.routes";
 import userRoutes from "./modules/users/usersRoutes";
@@ -10,6 +11,7 @@ import businessesRoutes from "./modules/businesses/businessesRoutes";
 import { requireAuth } from "./middleware/authMiddleware";
 import { AppError } from "./utils/AppError";
 import { errorHandler } from "./middleware/errorHandler";
+import { swaggerSpec } from "./config/swagger";
 
 const app: Application = express();
 
@@ -27,9 +29,11 @@ app.use("/api", todoRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/businesses", requireAuth, businessesRoutes);
-app.use("/api/services", requireAuth, servicesRoutes);
+app.use("/api/services", servicesRoutes);
 
-app.get("/", (req: Request, res: Response) => {
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.get("/", (_req: Request, res: Response) => {
   res.json({ message: "Flexy Booker API running" });
 });
 

@@ -23,6 +23,23 @@ export const deleteService = async (id: number) => {
   await db("services").where({ id }).del();
 };
 
+export const updateService = async (
+  id: number,
+  data: {
+    name: string;
+    description?: string;
+    price?: number;
+    schedule: string[];
+  },
+) => {
+  const [updated] = await db("services")
+    .where({ id })
+    .update(data)
+    .returning(["id", "business_id", "name", "description", "price", "schedule", "is_active", "custom_fields", "created_at"]);
+
+  return updated;
+};
+
 export const createService = async (data: {
   business_id: number;
   name: string;
