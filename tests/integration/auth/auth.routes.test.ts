@@ -3,8 +3,10 @@ import request from "supertest";
 import * as authController from "../../../src/modules/auth/authController";
 import router from "../../../src/modules/auth/authRoutes";
 
-// Mock the controller layer
 jest.mock("../../../src/modules/auth/authController");
+jest.mock("../../../src/middleware/authMiddleware", () => ({
+  requireAuth: (_req: any, _res: any, next: any) => next(),
+}));
 
 const app = express();
 app.use(express.json());
