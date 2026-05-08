@@ -7,4 +7,12 @@ module.exports = {
   moduleFileExtensions: ["ts", "js"],
   testMatch: ["**/?(*.)+(spec|test).ts"],
   clearMocks: true,
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
 };

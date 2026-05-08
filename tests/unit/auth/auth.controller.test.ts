@@ -15,7 +15,10 @@ const mockResponse = () => {
 };
 
 describe("authController", () => {
+  let next: jest.Mock;
+
   beforeEach(() => {
+    next = jest.fn();
     jest.clearAllMocks();
   });
 
@@ -30,34 +33,22 @@ describe("authController", () => {
 
       (authService.signUp as jest.Mock).mockResolvedValue({ token: "abc" });
 
-      await signUp(req, res);
+      await signUp(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({ token: "abc" });
     });
 
-    it("should return 400 on Error", async () => {
+    it("should call next on error", async () => {
       const req: any = { body: {} };
       const res = mockResponse();
+      const error = new Error("fail");
 
-      (authService.signUp as jest.Mock).mockRejectedValue(new Error("fail"));
+      (authService.signUp as jest.Mock).mockRejectedValue(error);
 
-      await signUp(req, res);
+      await signUp(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: "fail" });
-    });
-
-    it("should return 400 on unknown error", async () => {
-      const req: any = { body: {} };
-      const res = mockResponse();
-
-      (authService.signUp as jest.Mock).mockRejectedValue("weird");
-
-      await signUp(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: "unknown error" });
+      expect(next).toHaveBeenCalledWith(error);
     });
   });
 
@@ -72,34 +63,22 @@ describe("authController", () => {
 
       (authService.signIn as jest.Mock).mockResolvedValue({ token: "abc" });
 
-      await signIn(req, res);
+      await signIn(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({ token: "abc" });
     });
 
-    it("should return 401 on Error", async () => {
+    it("should call next on error", async () => {
       const req: any = { body: {} };
       const res = mockResponse();
+      const error = new Error("Invalid credentials");
 
-      (authService.signIn as jest.Mock).mockRejectedValue(new Error("invalid"));
+      (authService.signIn as jest.Mock).mockRejectedValue(error);
 
-      await signIn(req, res);
+      await signIn(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ message: "invalid" });
-    });
-
-    it("should return 401 on unknown error", async () => {
-      const req: any = { body: {} };
-      const res = mockResponse();
-
-      (authService.signIn as jest.Mock).mockRejectedValue("oops");
-
-      await signIn(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ message: "unknown error" });
+      expect(next).toHaveBeenCalledWith(error);
     });
   });
 
@@ -109,12 +88,12 @@ describe("authController", () => {
 
   describe("signOut", () => {
     it("should return 200 on success", async () => {
-      const req: any = { body: { userId: 1 } };
+      const req: any = { user: { userId: 1 } };
       const res = mockResponse();
 
       (authService.signOut as jest.Mock).mockResolvedValue(true);
 
-      await signOut(req, res);
+      await signOut(req, res, next);
 
       expect(authService.signOut).toHaveBeenCalledWith(1);
       expect(res.status).toHaveBeenCalledWith(200);
@@ -123,28 +102,16 @@ describe("authController", () => {
       });
     });
 
-    it("should return 400 on Error", async () => {
-      const req: any = { body: { userId: 1 } };
+    it("should call next on error", async () => {
+      const req: any = { user: { userId: 1 } };
       const res = mockResponse();
+      const error = new Error("fail");
 
-      (authService.signOut as jest.Mock).mockRejectedValue(new Error("fail"));
+      (authService.signOut as jest.Mock).mockRejectedValue(error);
 
-      await signOut(req, res);
+      await signOut(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: "fail" });
-    });
-
-    it("should return 400 on unknown error", async () => {
-      const req: any = { body: { userId: 1 } };
-      const res = mockResponse();
-
-      (authService.signOut as jest.Mock).mockRejectedValue(null);
-
-      await signOut(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: "unknown error" });
+      expect(next).toHaveBeenCalledWith(error);
     });
   });
 });

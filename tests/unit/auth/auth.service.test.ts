@@ -75,7 +75,7 @@ describe("authService", () => {
 
       await expect(
         authService.signIn({ email: "test@test.com", password: "123" }),
-      ).rejects.toThrow("User not found");
+      ).rejects.toThrow("Invalid credentials");
     });
 
     it("should throw if password is incorrect", async () => {
@@ -87,7 +87,7 @@ describe("authService", () => {
 
       await expect(
         authService.signIn({ email: "test@test.com", password: "wrong" }),
-      ).rejects.toThrow("Incorrect password");
+      ).rejects.toThrow("Invalid credentials");
     });
 
     it("should return token on success", async () => {
