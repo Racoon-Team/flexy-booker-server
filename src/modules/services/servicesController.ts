@@ -42,3 +42,17 @@ export const createService = async (
     next(error);
   }
 };
+
+export const updateService = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const updated = await service.updateService(Number(id), req.body);
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+};

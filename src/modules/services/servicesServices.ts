@@ -16,6 +16,30 @@ export const deleteService = async (id: number) => {
   await servicesRepository.deleteService(id);
 };
 
+export const updateService = async (
+  id: number,
+  data: {
+    name: string;
+    description?: string;
+    price?: number;
+    schedule: string[];
+  },
+) => {
+  if (!data.name || data.name.trim() === "") {
+    throw new Error("Service name is required");
+  }
+
+  if (!data.schedule || data.schedule.length === 0) {
+    throw new Error("At least one schedule slot is required");
+  }
+
+  if (data.price !== undefined && data.price <= 0) {
+    throw new Error("Too small: expected number to be >0");
+  }
+
+  return await servicesRepository.updateService(id, data);
+};
+
 export const createService = async (data: {
   business_id: number;
   name: string;
