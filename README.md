@@ -73,3 +73,11 @@ The API will be available at `http://localhost:3005`.
 | `npm start` | Run compiled build |
 | `npm test` | Run tests |
 | `npm run test:coverage` | Run tests with coverage report |
+
+## API docs
+
+Interactive Swagger UI is available at `http://localhost:3005/api-docs` once the server is running.
+
+To test protected endpoints:
+1. Call `POST /api/auth/login` to get a token.
+2. Click **Authorize** in the Swagger UI and paste the token.
