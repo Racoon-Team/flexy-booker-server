@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { JwtPayload } from "jsonwebtoken";
 import * as service from "./servicesServices";
 
 export const getServices = async (
@@ -8,14 +7,15 @@ export const getServices = async (
   next: NextFunction,
 ) => {
   try {
-    const { userId } = req.user as JwtPayload;
-    const servicios = await service.getServices(userId);
+    const search = req.query.search as string;
+
+    const servicios = await service.getServices(search);
+
     res.json(servicios);
   } catch (error) {
     next(error);
   }
 };
-
 export const deleteService = async (
   req: Request,
   res: Response,
