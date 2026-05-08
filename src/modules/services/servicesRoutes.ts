@@ -5,8 +5,8 @@ import * as servicesController from "./servicesController";
 const router = Router();
 
 router.get("/", servicesController.getServices);
-router.post("/", servicesController.createService);
+router.post("/", requireAuth, servicesController.createService);
 router.put("/:id", requireAuth, servicesController.updateService);
-router.delete("/:id", servicesController.deleteService);
+router.delete("/:id", requireAuth, servicesController.deleteService);
 
 export default router;
