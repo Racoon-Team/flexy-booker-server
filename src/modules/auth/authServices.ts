@@ -4,6 +4,7 @@ import * as usersRepository from "../users/usersRepository";
 import { SignUpDataTransferObject, SignInDataTransferObject } from "../users/usersModel";
 import { env } from "../../config/env";
 import { AppError } from "../../utils/AppError";
+import { logger } from "../../config/logger";
 
 export const signUp = async (data: SignUpDataTransferObject) => {
   const { userName, email, password, address, phoneNumber, userType } = data;
@@ -34,7 +35,8 @@ export const signUp = async (data: SignUpDataTransferObject) => {
 
   await usersRepository.updateSessionToken(user.id, token);
 
- 
+  logger.info("User signed up", { userId: user.id, email, userType: finalUserType });
+
   return {
     token,
     user: {
@@ -53,6 +55,7 @@ export const signIn = async (data: SignInDataTransferObject) => {
   const result = await usersRepository.findUserByEmail(email);
 
   if (result.rows.length === 0) {
+    logger.warn("Sign-in failed: email not found", { email });
     throw new AppError("Invalid credentials", 401);
   }
 
@@ -61,6 +64,7 @@ export const signIn = async (data: SignInDataTransferObject) => {
   const passwordMatch = await bcrypt.compare(password, user.password);
 
   if (!passwordMatch) {
+    logger.warn("Sign-in failed: wrong password", { email });
     throw new AppError("Invalid credentials", 401);
   }
 
@@ -71,6 +75,8 @@ export const signIn = async (data: SignInDataTransferObject) => {
   );
 
   await usersRepository.updateSessionToken(user.id, token);
+
+  logger.info("User signed in", { userId: user.id, email });
 
   return {
     token,
@@ -86,5 +92,6 @@ export const signIn = async (data: SignInDataTransferObject) => {
 
 export const signOut = async (userId: number) => {
   await usersRepository.updateSessionToken(userId, null);
+  logger.info("User signed out", { userId });
   return true;
 };
