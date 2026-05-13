@@ -35,12 +35,28 @@ export const updateService = async (
     description?: string;
     price?: number;
     schedule: string[];
+    custom_fields?: object[];
   },
 ) => {
   const [updated] = await db("services")
     .where({ id })
-    .update(data)
-    .returning(["id", "business_id", "name", "description", "price", "schedule", "is_active", "custom_fields", "created_at"]);
+    .update({
+      ...data,
+      custom_fields: data.custom_fields
+        ? JSON.stringify(data.custom_fields)
+        : JSON.stringify([]),
+    })
+    .returning([
+      "id",
+      "business_id",
+      "name",
+      "description",
+      "price",
+      "schedule",
+      "is_active",
+      "custom_fields",
+      "created_at",
+    ]);
 
   return updated;
 };

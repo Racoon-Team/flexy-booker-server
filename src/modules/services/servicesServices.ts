@@ -16,6 +16,7 @@ export const updateService = async (
     description?: string;
     price?: number;
     schedule: string[];
+    custom_fields?: object[];
   },
 ) => {
   if (!data.name || data.name.trim() === "") {
