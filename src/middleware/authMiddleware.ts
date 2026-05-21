@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { AppError } from "../utils/AppError";
 import { db } from "../db/knex";
+import { logger } from "../config/logger";
 
 export const requireAuth = async (
   req: Request,
@@ -12,6 +13,7 @@ export const requireAuth = async (
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      logger.warn("Auth rejected: no token", { url: req.originalUrl });
       return next(new AppError("Unauthorized - No token", 401));
     }
 
@@ -25,6 +27,7 @@ export const requireAuth = async (
       .first();
 
     if (!user || user.session_token !== token) {
+      logger.warn("Auth rejected: session expired", { userId: decoded.userId, url: req.originalUrl });
       return next(new AppError("Unauthorized - Session expired", 401));
     }
 
@@ -32,6 +35,7 @@ export const requireAuth = async (
 
     next();
   } catch (err) {
+    logger.warn("Auth rejected: invalid token", { url: req.originalUrl });
     next(new AppError("Unauthorized - Invalid token", 401));
   }
 };

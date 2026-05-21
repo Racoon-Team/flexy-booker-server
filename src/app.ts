@@ -12,11 +12,13 @@ import { requireAuth } from "./middleware/authMiddleware";
 import { AppError } from "./utils/AppError";
 import { errorHandler } from "./middleware/errorHandler";
 import { swaggerSpec } from "./config/swagger";
+import { requestLogger } from "./middleware/requestLogger";
 
 const app: Application = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 
 app.use((req: Request, res: Response, next) => {
   if (!isDbReady()) {
