@@ -4,7 +4,7 @@ Server for the Flexy Booker app built with Node.js, Express, TypeScript, and Pos
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 20+
 - Docker and Docker Compose
 
 ## First setup
@@ -73,6 +73,48 @@ The API will be available at `http://localhost:3005`.
 | `npm start` | Run compiled build |
 | `npm test` | Run tests |
 | `npm run test:coverage` | Run tests with coverage report |
+
+## Commit message format
+
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/) with a GitHub issue number as scope. This is enforced locally via Husky and on pull requests via GitHub Actions.
+
+### Format
+
+```
+type(#issue): short description
+```
+
+### Valid examples
+
+```bash
+feat(#42): add availability endpoint
+fix(#17): handle null session on logout
+chore(#8): upgrade express to v5
+refactor(#31): extract booking validator to separate module
+docs(#5): add commit format to README
+test(#23): add unit tests for auth middleware
+```
+
+### Invalid examples
+
+```bash
+feat: add something          # missing issue number
+feat(FLEX-42): add something # wrong format, use #number
+Add new feature              # missing type and issue
+```
+
+### Allowed types
+
+| Type | When to use |
+|---|---|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `chore` | Maintenance, deps, tooling |
+| `refactor` | Code change with no feature/fix |
+| `docs` | Documentation only |
+| `test` | Adding or updating tests |
+| `perf` | Performance improvement |
+| `ci` | CI/CD changes |
 
 ## API docs
 
