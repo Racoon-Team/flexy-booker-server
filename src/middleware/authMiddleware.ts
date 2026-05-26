@@ -31,7 +31,7 @@ export const requireAuth = async (
     req.user = decoded;
 
     next();
-  } catch (err) {
+  } catch {
     logger.warn("Auth rejected: invalid token", { url: req.originalUrl });
     next(new AppError("Unauthorized - Invalid token", 401));
   }

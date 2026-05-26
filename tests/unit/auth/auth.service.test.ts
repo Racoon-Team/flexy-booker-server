@@ -38,7 +38,7 @@ describe("authService", () => {
 
     it("should throw if required fields are missing", async () => {
       await expect(
-        authService.signUp({ email: "test@test.com" } as any),
+        authService.signUp({ email: "test@test.com" } as Parameters<typeof authService.signUp>[0]),
       ).rejects.toThrow("Missing required fields");
     });
 

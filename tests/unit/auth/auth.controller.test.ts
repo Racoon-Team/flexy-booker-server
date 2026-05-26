@@ -4,13 +4,17 @@ import {
   signUp,
 } from "../../../src/modules/auth/authController";
 import * as authService from "../../../src/modules/auth/authServices";
+import { Request, Response } from "express";
 
 jest.mock("../../../src/modules/auth/authServices");
 
 const mockResponse = () => {
-  const res: any = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
+  const res = {
+    status: jest.fn(),
+    json: jest.fn(),
+  } as unknown as Response;
+  (res.status as jest.Mock).mockReturnValue(res);
+  (res.json as jest.Mock).mockReturnValue(res);
   return res;
 };
 
@@ -28,7 +32,7 @@ describe("authController", () => {
 
   describe("signUp", () => {
     it("should return 201 on success", async () => {
-      const req: any = { body: { email: "test@test.com" } };
+      const req = { body: { email: "test@test.com" } } as Request;
       const res = mockResponse();
 
       (authService.signUp as jest.Mock).mockResolvedValue({ token: "abc" });
@@ -40,7 +44,7 @@ describe("authController", () => {
     });
 
     it("should call next on error", async () => {
-      const req: any = { body: {} };
+      const req = { body: {} } as Request;
       const res = mockResponse();
       const error = new Error("fail");
 
@@ -58,7 +62,7 @@ describe("authController", () => {
 
   describe("signIn", () => {
     it("should return 200 on success", async () => {
-      const req: any = { body: { email: "test@test.com" } };
+      const req = { body: { email: "test@test.com" } } as Request;
       const res = mockResponse();
 
       (authService.signIn as jest.Mock).mockResolvedValue({ token: "abc" });
@@ -70,7 +74,7 @@ describe("authController", () => {
     });
 
     it("should call next on error", async () => {
-      const req: any = { body: {} };
+      const req = { body: {} } as Request;
       const res = mockResponse();
       const error = new Error("Invalid credentials");
 
@@ -88,14 +92,14 @@ describe("authController", () => {
 
   describe("signOut", () => {
     it("should return 200 on success", async () => {
-      const req: any = { user: { userId: 1 } };
+      const req = { user: { userId: "uuid-1" } } as unknown as Request;
       const res = mockResponse();
 
       (authService.signOut as jest.Mock).mockResolvedValue(true);
 
       await signOut(req, res, next);
 
-      expect(authService.signOut).toHaveBeenCalledWith(1);
+      expect(authService.signOut).toHaveBeenCalledWith("uuid-1");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         message: "Successfully logged out",
@@ -103,7 +107,7 @@ describe("authController", () => {
     });
 
     it("should call next on error", async () => {
-      const req: any = { user: { userId: 1 } };
+      const req = { user: { userId: "uuid-1" } } as unknown as Request;
       const res = mockResponse();
       const error = new Error("fail");
 

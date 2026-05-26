@@ -5,7 +5,7 @@ import router from "../../../src/modules/auth/authRoutes";
 
 jest.mock("../../../src/modules/auth/authController");
 jest.mock("../../../src/middleware/authMiddleware", () => ({
-  requireAuth: (_req: any, _res: any, next: any) => next(),
+  requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
 const app = express();
