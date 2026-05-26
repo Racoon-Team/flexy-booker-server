@@ -1,9 +1,9 @@
 import { db } from "../../db/knex";
 
-export const findBusinessByUserId = async (userId: number) => {
+export const findBusinessByUserId = async (userId: string) => {
   const rows = await db("businesses")
-    .select("id", "user_id", "business_name", "category", "description")
-    .where("user_id", userId)
+    .select("id", "owner_id", "name", "description", "status")
+    .where("owner_id", userId)
     .first();
 
   return rows;

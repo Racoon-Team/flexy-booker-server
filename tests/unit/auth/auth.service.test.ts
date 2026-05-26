@@ -20,16 +20,17 @@ describe("authService", () => {
     it("should create user and return token", async () => {
       (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
       (jwt.sign as jest.Mock).mockReturnValue("token");
+      (usersRepository.createSession as jest.Mock).mockResolvedValue(undefined);
 
       (usersRepository.createUser as jest.Mock).mockResolvedValue({
-        rows: [{ id: 1, name: "John", email: "test@test.com" }],
+        rows: [{ id: "uuid-1", first_name: "John", last_name: null, email: "test@test.com", role: "client" }],
       });
 
       const result = await authService.signUp({
-        userName: "John",
+        firstName: "John",
         email: "test@test.com",
         password: "123456",
-      } as any);
+      });
 
       expect(result.token).toBe("token");
       expect(result.user.userName).toBe("John");
@@ -37,27 +38,28 @@ describe("authService", () => {
 
     it("should throw if required fields are missing", async () => {
       await expect(
-        authService.signUp({ email: "test@test.com" } as any),
+        authService.signUp({ email: "test@test.com" } as Parameters<typeof authService.signUp>[0]),
       ).rejects.toThrow("Missing required fields");
     });
 
-    it("should use default userType 'cliente'", async () => {
+    it("should default role to 'client'", async () => {
       (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
       (jwt.sign as jest.Mock).mockReturnValue("token");
+      (usersRepository.createSession as jest.Mock).mockResolvedValue(undefined);
 
       (usersRepository.createUser as jest.Mock).mockResolvedValue({
-        rows: [{ id: 1, name: "John", email: "test@test.com" }],
+        rows: [{ id: "uuid-1", first_name: "John", last_name: null, email: "test@test.com", role: "client" }],
       });
 
       await authService.signUp({
-        userName: "John",
+        firstName: "John",
         email: "test@test.com",
         password: "123456",
-      } as any);
+      });
 
       expect(usersRepository.createUser).toHaveBeenCalledWith(
         expect.objectContaining({
-          userType: "cliente",
+          role: "client",
         }),
       );
     });
@@ -80,7 +82,7 @@ describe("authService", () => {
 
     it("should throw if password is incorrect", async () => {
       (usersRepository.findUserByEmail as jest.Mock).mockResolvedValue({
-        rows: [{ id: 1, password: "hashed" }],
+        rows: [{ id: "uuid-1", password_hash: "hashed" }],
       });
 
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
@@ -94,17 +96,20 @@ describe("authService", () => {
       (usersRepository.findUserByEmail as jest.Mock).mockResolvedValue({
         rows: [
           {
-            id: 1,
-            name: "John",
+            id: "uuid-1",
+            first_name: "John",
+            last_name: null,
             email: "test@test.com",
-            password: "hashed",
-            user_type: "admin",
+            password_hash: "hashed",
+            role: "admin",
+            avatar_url: null,
           },
         ],
       });
 
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       (jwt.sign as jest.Mock).mockReturnValue("token");
+      (usersRepository.createSession as jest.Mock).mockResolvedValue(undefined);
 
       const result = await authService.signIn({
         email: "test@test.com",
@@ -121,12 +126,12 @@ describe("authService", () => {
   // ======================
 
   describe("signOut", () => {
-    it("should clear session token", async () => {
-      (usersRepository.updateSessionToken as jest.Mock).mockResolvedValue(true);
+    it("should revoke all sessions", async () => {
+      (usersRepository.revokeAllSessions as jest.Mock).mockResolvedValue(undefined);
 
-      const result = await authService.signOut(1);
+      const result = await authService.signOut("uuid-1");
 
-      expect(usersRepository.updateSessionToken).toHaveBeenCalledWith(1, null);
+      expect(usersRepository.revokeAllSessions).toHaveBeenCalledWith("uuid-1");
       expect(result).toBe(true);
     });
   });

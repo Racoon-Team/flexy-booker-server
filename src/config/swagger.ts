@@ -24,7 +24,7 @@ const options: swaggerJsdoc.Options = {
             user: {
               type: "object",
               properties: {
-                userId: { type: "integer" },
+                userId: { type: "string", format: "uuid" },
                 userName: { type: "string" },
                 email: { type: "string" },
                 authority: { type: "array", items: { type: "string" } },
@@ -77,14 +77,14 @@ const options: swaggerJsdoc.Options = {
               "application/json": {
                 schema: {
                   type: "object",
-                  required: ["userName", "email", "password"],
+                  required: ["firstName", "email", "password"],
                   properties: {
-                    userName: { type: "string" },
+                    firstName: { type: "string" },
+                    lastName: { type: "string" },
                     email: { type: "string", format: "email" },
                     password: { type: "string" },
-                    address: { type: "string" },
-                    phoneNumber: { type: "string" },
-                    userType: { type: "string", enum: ["cliente", "empresa"], default: "cliente" },
+                    phone: { type: "string" },
+                    role: { type: "string", enum: ["client", "owner", "admin"], default: "client" },
                   },
                 },
               },

@@ -1,11 +1,12 @@
 import * as servicesController from '../../../src/modules/services/servicesController'
 import * as servicesService from '../../../src/modules/services/servicesServices'
+import { Request, Response } from 'express'
 
 jest.mock('../../../src/modules/services/servicesServices')
 
 describe('Services Controller', () => {
-  let req: any
-  let res: any
+  let req: Partial<Request>
+  let res: Partial<Response>
   let next: jest.Mock
 
   beforeEach(() => {
@@ -23,7 +24,7 @@ describe('Services Controller', () => {
       const mockServices = [{ id: 1, name: 'Service' }]
       ;(servicesService.getServices as jest.Mock).mockResolvedValue(mockServices)
 
-      await servicesController.getServices(req, res, next)
+      await servicesController.getServices(req as Request, res as Response, next)
 
       expect(res.json).toHaveBeenCalledWith(mockServices)
     })
@@ -32,7 +33,7 @@ describe('Services Controller', () => {
       req.query = { search: 'test' }
       ;(servicesService.getServices as jest.Mock).mockResolvedValue([])
 
-      await servicesController.getServices(req, res, next)
+      await servicesController.getServices(req as Request, res as Response, next)
 
       expect(servicesService.getServices).toHaveBeenCalledWith('test')
     })
@@ -41,7 +42,7 @@ describe('Services Controller', () => {
       const error = new Error('fail')
       ;(servicesService.getServices as jest.Mock).mockRejectedValue(error)
 
-      await servicesController.getServices(req, res, next)
+      await servicesController.getServices(req as Request, res as Response, next)
 
       expect(next).toHaveBeenCalledWith(error)
     })
@@ -53,7 +54,7 @@ describe('Services Controller', () => {
       const mockService = { id: 1 }
       ;(servicesService.createService as jest.Mock).mockResolvedValue(mockService)
 
-      await servicesController.createService(req, res, next)
+      await servicesController.createService(req as Request, res as Response, next)
 
       expect(res.status).toHaveBeenCalledWith(201)
       expect(res.json).toHaveBeenCalledWith(mockService)
@@ -64,7 +65,7 @@ describe('Services Controller', () => {
       const error = new Error('Service name is required')
       ;(servicesService.createService as jest.Mock).mockRejectedValue(error)
 
-      await servicesController.createService(req, res, next)
+      await servicesController.createService(req as Request, res as Response, next)
 
       expect(next).toHaveBeenCalledWith(error)
     })
@@ -75,7 +76,7 @@ describe('Services Controller', () => {
       req.params = { id: '1' }
       ;(servicesService.deleteService as jest.Mock).mockResolvedValue(undefined)
 
-      await servicesController.deleteService(req, res, next)
+      await servicesController.deleteService(req as Request, res as Response, next)
 
       expect(res.json).toHaveBeenCalledWith({ message: 'Service deleted successfully' })
     })
@@ -85,7 +86,7 @@ describe('Services Controller', () => {
       const error = new Error('fail')
       ;(servicesService.deleteService as jest.Mock).mockRejectedValue(error)
 
-      await servicesController.deleteService(req, res, next)
+      await servicesController.deleteService(req as Request, res as Response, next)
 
       expect(next).toHaveBeenCalledWith(error)
     })
@@ -98,7 +99,7 @@ describe('Services Controller', () => {
       const mockService = { id: 1, name: 'Updated' }
       ;(servicesService.updateService as jest.Mock).mockResolvedValue(mockService)
 
-      await servicesController.updateService(req, res, next)
+      await servicesController.updateService(req as Request, res as Response, next)
 
       expect(res.json).toHaveBeenCalledWith(mockService)
     })
@@ -109,7 +110,7 @@ describe('Services Controller', () => {
       const error = new Error('Service name is required')
       ;(servicesService.updateService as jest.Mock).mockRejectedValue(error)
 
-      await servicesController.updateService(req, res, next)
+      await servicesController.updateService(req as Request, res as Response, next)
 
       expect(next).toHaveBeenCalledWith(error)
     })

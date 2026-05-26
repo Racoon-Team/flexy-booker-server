@@ -12,35 +12,35 @@ describe('Users Repository', () => {
 
   describe('createUser', () => {
     it('should insert user and return rows', async () => {
-      const mockUser = { id: 1, name: 'John', email: 'john@test.com' }
+      const mockUser = { id: 'uuid-1', first_name: 'John', last_name: null, email: 'john@test.com', role: 'client' }
       const returningMock = jest.fn().mockResolvedValue([mockUser])
       const insertMock = jest.fn().mockReturnValue({ returning: returningMock })
       ;(db as unknown as jest.Mock).mockReturnValue({ insert: insertMock })
 
       const result = await usersRepository.createUser({
-        name: 'John',
+        firstName: 'John',
         email: 'john@test.com',
-        password: 'hashed',
-        userType: 'cliente',
+        passwordHash: 'hashed',
+        role: 'client',
       })
 
       expect(db).toHaveBeenCalledWith('users')
       expect(insertMock).toHaveBeenCalledWith({
-        name: 'John',
+        first_name: 'John',
+        last_name: undefined,
         email: 'john@test.com',
-        password: 'hashed',
-        user_type: 'cliente',
-        address: undefined,
-        phone_number: undefined,
+        password_hash: 'hashed',
+        role: 'client',
+        phone: undefined,
       })
-      expect(returningMock).toHaveBeenCalledWith(['id', 'name', 'email'])
+      expect(returningMock).toHaveBeenCalledWith(['id', 'first_name', 'last_name', 'email', 'role'])
       expect(result).toEqual({ rows: [mockUser] })
     })
   })
 
   describe('findUserByEmail', () => {
     it('should find user by email and return rows', async () => {
-      const mockUsers = [{ id: 1, name: 'John', email: 'john@test.com' }]
+      const mockUsers = [{ id: 'uuid-1', first_name: 'John', email: 'john@test.com' }]
       const selectMock = jest.fn().mockResolvedValue(mockUsers)
       const whereMock = jest.fn().mockReturnValue({ select: selectMock })
       ;(db as unknown as jest.Mock).mockReturnValue({ where: whereMock })
@@ -61,30 +61,6 @@ describe('Users Repository', () => {
       const result = await usersRepository.findUserByEmail('nobody@test.com')
 
       expect(result).toEqual({ rows: [] })
-    })
-  })
-
-  describe('updateSessionToken', () => {
-    it('should update session token for user', async () => {
-      const updateMock = jest.fn().mockResolvedValue(undefined)
-      const whereMock = jest.fn().mockReturnValue({ update: updateMock })
-      ;(db as unknown as jest.Mock).mockReturnValue({ where: whereMock })
-
-      await usersRepository.updateSessionToken(1, 'some-token')
-
-      expect(db).toHaveBeenCalledWith('users')
-      expect(whereMock).toHaveBeenCalledWith({ id: 1 })
-      expect(updateMock).toHaveBeenCalledWith({ session_token: 'some-token' })
-    })
-
-    it('should clear session token when null is passed', async () => {
-      const updateMock = jest.fn().mockResolvedValue(undefined)
-      const whereMock = jest.fn().mockReturnValue({ update: updateMock })
-      ;(db as unknown as jest.Mock).mockReturnValue({ where: whereMock })
-
-      await usersRepository.updateSessionToken(1, null)
-
-      expect(updateMock).toHaveBeenCalledWith({ session_token: null })
     })
   })
 })

@@ -14,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
   flyway:
     image: flyway/flyway
-    command: -url=jdbc:postgresql://postgres:5432/flexy_booker -user=postgres -password=postgres migrate
+    command: -url=jdbc:postgresql://postgres:5432/flexy_booker -user=postgres -password=postgres -connectRetries=60 migrate
     volumes:
       - ./src/db/migration:/flyway/sql
     depends_on:

@@ -6,44 +6,57 @@ import { env } from "../../config/env";
 import { AppError } from "../../utils/AppError";
 import { logger } from "../../config/logger";
 
-export const signUp = async (data: SignUpDataTransferObject) => {
-  const { userName, email, password, address, phoneNumber, userType } = data;
+const sessionExpiresAt = () => {
+  const ms = parseDuration(env.jwt.expiresIn);
+  return new Date(Date.now() + ms);
+};
 
-  if (!userName || !email || !password) {
+const parseDuration = (d: string): number => {
+  const match = d.match(/^(\d+)([smhd])$/);
+  if (!match) return 7 * 24 * 60 * 60 * 1000;
+  const n = parseInt(match[1]);
+  const units: Record<string, number> = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
+  return n * units[match[2]];
+};
+
+export const signUp = async (data: SignUpDataTransferObject) => {
+  const { firstName, lastName, email, password, phone, role } = data;
+
+  if (!firstName || !email || !password) {
     throw new Error("Missing required fields");
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const finalUserType = userType || "cliente";
+  const passwordHash = await bcrypt.hash(password, 10);
+  const finalRole = role ?? "client";
 
   const result = await usersRepository.createUser({
-    name: userName,
+    firstName,
+    lastName,
     email,
-    password: hashedPassword,
-    userType: finalUserType,
-    address,
-    phoneNumber,
+    passwordHash,
+    role: finalRole,
+    phone,
   });
 
   const user = result.rows[0];
 
   const token = jwt.sign(
-    { userId: user.id, userType: finalUserType },
+    { userId: user.id, role: user.role },
     env.jwt.secret,
     { expiresIn: env.jwt.expiresIn } as jwt.SignOptions
   );
 
-  await usersRepository.updateSessionToken(user.id, token);
+  await usersRepository.createSession(user.id, token, sessionExpiresAt());
 
-  logger.info("User signed up", { userId: user.id, email, userType: finalUserType });
+  logger.info("User signed up", { userId: user.id, email, role: finalRole });
 
   return {
     token,
     user: {
       userId: user.id,
-      userName: user.name,
+      userName: [user.first_name, user.last_name].filter(Boolean).join(" "),
       email: user.email,
-      authority: [finalUserType],
+      authority: [user.role],
       avatar: "",
     },
   };
@@ -61,7 +74,7 @@ export const signIn = async (data: SignInDataTransferObject) => {
 
   const user = result.rows[0];
 
-  const passwordMatch = await bcrypt.compare(password, user.password);
+  const passwordMatch = await bcrypt.compare(password, user.password_hash);
 
   if (!passwordMatch) {
     logger.warn("Sign-in failed: wrong password", { email });
@@ -69,12 +82,12 @@ export const signIn = async (data: SignInDataTransferObject) => {
   }
 
   const token = jwt.sign(
-    { userId: user.id, userType: user.user_type },
+    { userId: user.id, role: user.role },
     env.jwt.secret,
     { expiresIn: env.jwt.expiresIn } as jwt.SignOptions
   );
 
-  await usersRepository.updateSessionToken(user.id, token);
+  await usersRepository.createSession(user.id, token, sessionExpiresAt());
 
   logger.info("User signed in", { userId: user.id, email });
 
@@ -82,16 +95,16 @@ export const signIn = async (data: SignInDataTransferObject) => {
     token,
     user: {
       userId: user.id,
-      userName: user.name,
+      userName: [user.first_name, user.last_name].filter(Boolean).join(" "),
       email: user.email,
-      authority: [user.user_type || "cliente"],
-      avatar: "",
+      authority: [user.role],
+      avatar: user.avatar_url ?? "",
     },
   };
 };
 
-export const signOut = async (userId: number) => {
-  await usersRepository.updateSessionToken(userId, null);
+export const signOut = async (userId: string) => {
+  await usersRepository.revokeAllSessions(userId);
   logger.info("User signed out", { userId });
   return true;
 };
