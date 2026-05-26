@@ -1,7 +1,7 @@
 import * as businessesRepository from "./businessesRepository";
 import { AppError } from "../../utils/AppError";
 
-export const getMyBusiness = async (userId: number) => {
+export const getMyBusiness = async (userId: string) => {
   const business = await businessesRepository.findBusinessByUserId(userId);
 
   if (!business) {

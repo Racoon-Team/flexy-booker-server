@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { AppError } from "../utils/AppError";
-import { db } from "../db/knex";
 import { logger } from "../config/logger";
+import { findValidSession } from "../modules/users/usersRepository";
 
 export const requireAuth = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {
@@ -21,12 +21,9 @@ export const requireAuth = async (
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
 
-    const user = await db("users")
-      .where({ id: decoded.userId })
-      .select("session_token")
-      .first();
+    const session = await findValidSession(decoded.userId, token);
 
-    if (!user || user.session_token !== token) {
+    if (!session) {
       logger.warn("Auth rejected: session expired", { userId: decoded.userId, url: req.originalUrl });
       return next(new AppError("Unauthorized - Session expired", 401));
     }
