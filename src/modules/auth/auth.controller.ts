@@ -1,8 +1,12 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
-import * as authService from "./authServices";
+import * as authService from "./auth.services";
 
-export const signUp = async (req: Request, res: Response, next: NextFunction) => {
+export const signUp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const user = await authService.signUp(req.body);
     res.status(201).json(user);
@@ -11,7 +15,11 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-export const signIn = async (req: Request, res: Response, next: NextFunction) => {
+export const signIn = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const user = await authService.signIn(req.body);
     res.status(200).json(user);
@@ -20,7 +28,11 @@ export const signIn = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-export const signOut = async (req: Request, res: Response, next: NextFunction) => {
+export const signOut = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { userId } = req.user as JwtPayload;
     await authService.signOut(userId);

@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { db } from "../../db/knex";
-import { CreateUserParams } from "./usersModel";
+import { CreateUserParams } from "./users.model";
 
 const hashToken = (token: string) =>
   crypto.createHash("sha256").update(token).digest("hex");
@@ -28,7 +28,7 @@ export const findUserByEmail = async (email: string) => {
 export const createSession = async (
   userId: string,
   token: string,
-  expiresAt: Date
+  expiresAt: Date,
 ) => {
   await db("sessions")
     .where({ user_id: userId })

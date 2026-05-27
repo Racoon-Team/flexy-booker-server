@@ -1,8 +1,12 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
-import * as businessesServices from "./businessesServices";
+import * as businessesServices from "./businesses.services";
 
-export const getMyBusiness = async (req: Request, res: Response, next: NextFunction) => {
+export const getMyBusiness = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { userId } = req.user as JwtPayload;
 

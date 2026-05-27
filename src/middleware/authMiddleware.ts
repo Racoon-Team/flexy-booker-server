@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { AppError } from "../utils/AppError";
 import { logger } from "../config/logger";
-import { findValidSession } from "../modules/users/usersRepository";
+import { findValidSession } from "../modules/users/users.repository";
+import { AppError } from "../utils/AppError";
 
 export const requireAuth = async (
   req: Request,
   _res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const authHeader = req.headers.authorization;
@@ -19,12 +19,18 @@ export const requireAuth = async (
 
     const token = authHeader.split(" ")[1];
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string,
+    ) as JwtPayload;
 
     const session = await findValidSession(decoded.userId, token);
 
     if (!session) {
-      logger.warn("Auth rejected: session expired", { userId: decoded.userId, url: req.originalUrl });
+      logger.warn("Auth rejected: session expired", {
+        userId: decoded.userId,
+        url: req.originalUrl,
+      });
       return next(new AppError("Unauthorized - Session expired", 401));
     }
 

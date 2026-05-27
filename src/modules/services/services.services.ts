@@ -1,4 +1,4 @@
-import * as servicesRepository from "./servicesRepository";
+import * as servicesRepository from "./services.repository";
 
 export const getServices = async (search?: string) => {
   const result = await servicesRepository.getServices(search);

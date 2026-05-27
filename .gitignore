@@ -146,8 +146,8 @@ vite.config.ts.timestamp-*
 .idea/
 .vscode/
 
-package-lock.json
-
 .claude
 .codegraph
 .mcp.json
+
+package-lock.json

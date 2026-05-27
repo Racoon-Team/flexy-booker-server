@@ -1,11 +1,11 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import * as authService from "../../../src/modules/auth/authServices";
-import * as usersRepository from "../../../src/modules/users/usersRepository";
+import * as authService from "../../../src/modules/auth/auth.services";
+import * as usersRepository from "../../../src/modules/users/users.repository";
 
 jest.mock("bcrypt");
 jest.mock("jsonwebtoken");
-jest.mock("../../../src/modules/users/usersRepository");
+jest.mock("../../../src/modules/users/users.repository");
 
 describe("authService", () => {
   beforeEach(() => {
@@ -23,7 +23,15 @@ describe("authService", () => {
       (usersRepository.createSession as jest.Mock).mockResolvedValue(undefined);
 
       (usersRepository.createUser as jest.Mock).mockResolvedValue({
-        rows: [{ id: "uuid-1", first_name: "John", last_name: null, email: "test@test.com", role: "client" }],
+        rows: [
+          {
+            id: "uuid-1",
+            first_name: "John",
+            last_name: null,
+            email: "test@test.com",
+            role: "client",
+          },
+        ],
       });
 
       const result = await authService.signUp({
@@ -38,7 +46,9 @@ describe("authService", () => {
 
     it("should throw if required fields are missing", async () => {
       await expect(
-        authService.signUp({ email: "test@test.com" } as Parameters<typeof authService.signUp>[0]),
+        authService.signUp({ email: "test@test.com" } as Parameters<
+          typeof authService.signUp
+        >[0]),
       ).rejects.toThrow("Missing required fields");
     });
 
@@ -48,7 +58,15 @@ describe("authService", () => {
       (usersRepository.createSession as jest.Mock).mockResolvedValue(undefined);
 
       (usersRepository.createUser as jest.Mock).mockResolvedValue({
-        rows: [{ id: "uuid-1", first_name: "John", last_name: null, email: "test@test.com", role: "client" }],
+        rows: [
+          {
+            id: "uuid-1",
+            first_name: "John",
+            last_name: null,
+            email: "test@test.com",
+            role: "client",
+          },
+        ],
       });
 
       await authService.signUp({
@@ -127,7 +145,9 @@ describe("authService", () => {
 
   describe("signOut", () => {
     it("should revoke all sessions", async () => {
-      (usersRepository.revokeAllSessions as jest.Mock).mockResolvedValue(undefined);
+      (usersRepository.revokeAllSessions as jest.Mock).mockResolvedValue(
+        undefined,
+      );
 
       const result = await authService.signOut("uuid-1");
 
