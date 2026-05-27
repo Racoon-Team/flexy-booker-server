@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import * as service from "./servicesServices";
+import { NextFunction, Request, Response } from "express";
+import * as service from "./services.services";
 
 export const getServices = async (
   req: Request,

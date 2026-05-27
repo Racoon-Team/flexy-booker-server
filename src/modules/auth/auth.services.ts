@@ -1,10 +1,13 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import * as usersRepository from "../users/usersRepository";
-import { SignUpDataTransferObject, SignInDataTransferObject } from "../users/usersModel";
 import { env } from "../../config/env";
-import { AppError } from "../../utils/AppError";
 import { logger } from "../../config/logger";
+import { AppError } from "../../utils/AppError";
+import {
+  SignInDataTransferObject,
+  SignUpDataTransferObject,
+} from "../users/users.model";
+import * as usersRepository from "../users/users.repository";
 
 const sessionExpiresAt = () => {
   const ms = parseDuration(env.jwt.expiresIn);
@@ -15,7 +18,12 @@ const parseDuration = (d: string): number => {
   const match = d.match(/^(\d+)([smhd])$/);
   if (!match) return 7 * 24 * 60 * 60 * 1000;
   const n = parseInt(match[1]);
-  const units: Record<string, number> = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
+  const units: Record<string, number> = {
+    s: 1000,
+    m: 60000,
+    h: 3600000,
+    d: 86400000,
+  };
   return n * units[match[2]];
 };
 
@@ -40,11 +48,9 @@ export const signUp = async (data: SignUpDataTransferObject) => {
 
   const user = result.rows[0];
 
-  const token = jwt.sign(
-    { userId: user.id, role: user.role },
-    env.jwt.secret,
-    { expiresIn: env.jwt.expiresIn } as jwt.SignOptions
-  );
+  const token = jwt.sign({ userId: user.id, role: user.role }, env.jwt.secret, {
+    expiresIn: env.jwt.expiresIn,
+  } as jwt.SignOptions);
 
   await usersRepository.createSession(user.id, token, sessionExpiresAt());
 
@@ -81,11 +87,9 @@ export const signIn = async (data: SignInDataTransferObject) => {
     throw new AppError("Invalid credentials", 401);
   }
 
-  const token = jwt.sign(
-    { userId: user.id, role: user.role },
-    env.jwt.secret,
-    { expiresIn: env.jwt.expiresIn } as jwt.SignOptions
-  );
+  const token = jwt.sign({ userId: user.id, role: user.role }, env.jwt.secret, {
+    expiresIn: env.jwt.expiresIn,
+  } as jwt.SignOptions);
 
   await usersRepository.createSession(user.id, token, sessionExpiresAt());
 

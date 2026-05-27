@@ -1,9 +1,9 @@
 import express from "express";
 import request from "supertest";
-import * as authController from "../../../src/modules/auth/authController";
-import router from "../../../src/modules/auth/authRoutes";
+import * as authController from "../../../src/modules/auth/auth.controller";
+import router from "../../../src/modules/auth/auth.routes";
 
-jest.mock("../../../src/modules/auth/authController");
+jest.mock("../../../src/modules/auth/auth.controller");
 jest.mock("../../../src/middleware/authMiddleware", () => ({
   requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));

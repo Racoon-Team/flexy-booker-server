@@ -1,5 +1,5 @@
-import * as businessesRepository from "./businessesRepository";
 import { AppError } from "../../utils/AppError";
+import * as businessesRepository from "./businesses.repository";
 
 export const getMyBusiness = async (userId: string) => {
   const business = await businessesRepository.findBusinessByUserId(userId);

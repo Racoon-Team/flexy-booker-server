@@ -1,5 +1,5 @@
-import * as servicesRepository from "../../../src/modules/services/servicesRepository";
 import { db } from "../../../src/db/knex";
+import * as servicesRepository from "../../../src/modules/services/services.repository";
 
 jest.mock("../../../src/db/knex", () => ({
   db: jest.fn(),

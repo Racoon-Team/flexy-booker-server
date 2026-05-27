@@ -1,12 +1,12 @@
+import { Request, Response } from "express";
 import {
   signIn,
   signOut,
   signUp,
-} from "../../../src/modules/auth/authController";
-import * as authService from "../../../src/modules/auth/authServices";
-import { Request, Response } from "express";
+} from "../../../src/modules/auth/auth.controller";
+import * as authService from "../../../src/modules/auth/auth.services";
 
-jest.mock("../../../src/modules/auth/authServices");
+jest.mock("../../../src/modules/auth/auth.services");
 
 const mockResponse = () => {
   const res = {

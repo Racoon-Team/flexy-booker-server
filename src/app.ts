@@ -2,17 +2,17 @@ import cors from "cors";
 import express, { Application, Request, Response } from "express";
 import swaggerUi from "swagger-ui-express";
 
-import todoRoutes from "./modules/todo/todo.routes";
-import userRoutes from "./modules/users/usersRoutes";
-import authRoutes from "./modules/auth/authRoutes";
-import servicesRoutes from "./modules/services/servicesRoutes";
-import { isDbReady } from "./db/dbState";
-import businessesRoutes from "./modules/businesses/businessesRoutes";
-import { requireAuth } from "./middleware/authMiddleware";
-import { AppError } from "./utils/AppError";
-import { errorHandler } from "./middleware/errorHandler";
 import { swaggerSpec } from "./config/swagger";
+import { isDbReady } from "./db/dbState";
+import { requireAuth } from "./middleware/authMiddleware";
+import { errorHandler } from "./middleware/errorHandler";
 import { requestLogger } from "./middleware/requestLogger";
+import authRoutes from "./modules/auth/auth.routes";
+import businessesRoutes from "./modules/businesses/businesses.routes";
+import servicesRoutes from "./modules/services/services.routes";
+import todoRoutes from "./modules/todo/todo.routes";
+import userRoutes from "./modules/users/users.routes";
+import { AppError } from "./utils/AppError";
 
 const app: Application = express();
 
