@@ -6,6 +6,7 @@ import { swaggerSpec } from "./config/swagger";
 import { isDbReady } from "./db/dbState";
 import { requireAuth } from "./middleware/authMiddleware";
 import { errorHandler } from "./middleware/errorHandler";
+import { apiLimiter } from "./middleware/rateLimiter";
 import { requestLogger } from "./middleware/requestLogger";
 import authRoutes from "./modules/auth/auth.routes";
 import businessesRoutes from "./modules/businesses/businesses.routes";
@@ -30,7 +31,7 @@ app.use((req: Request, res: Response, next) => {
 app.use("/api", todoRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/businesses", requireAuth, businessesRoutes);
+app.use("/api/businesses", apiLimiter, requireAuth, businessesRoutes);
 app.use("/api/services", servicesRoutes);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
