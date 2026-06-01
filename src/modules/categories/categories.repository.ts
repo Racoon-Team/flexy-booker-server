@@ -61,3 +61,37 @@ export const getCategoriesTree = async (includeArchived = false) => {
 
   return rows.rows;
 };
+
+export const getCategoryById = async (id: string) => {
+  const category = await db("categories as c")
+    .leftJoin("categories as p", "c.parent_id", "p.id")
+    .select(
+      "c.id",
+      "c.name",
+      "c.slug",
+      "c.icon",
+      "c.description",
+      "c.status",
+      "c.sort_order",
+      "c.show_on_homepage",
+      "c.show_in_search",
+      "c.allow_new_businesses",
+      "c.featured_on_homepage",
+      "c.created_at",
+      "c.updated_at",
+      "p.id as parent_id",
+      "p.name as parent_name",
+      "p.slug as parent_slug",
+    )
+    .where("c.id", id)
+    .first();
+
+  if (!category) return null;
+
+  const tags = await db("category_tags as ct")
+    .join("tags as t", "ct.tag_id", "t.id")
+    .select("t.id", "t.name", "t.slug")
+    .where("ct.category_id", id);
+
+  return { category, tags };
+};

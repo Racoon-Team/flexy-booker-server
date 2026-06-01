@@ -13,8 +13,8 @@ import businessesRoutes from "./modules/businesses/businesses.routes";
 import servicesRoutes from "./modules/services/services.routes";
 import todoRoutes from "./modules/todo/todo.routes";
 import userRoutes from "./modules/users/users.routes";
-import { AppError } from "./utils/AppError";
 import categoriesRoutes from "./modules/categories/categories.routes";
+import { AppError } from "./utils/AppError";
 
 const app: Application = express();
 
