@@ -7,4 +7,6 @@ const router = Router();
 router.get("/tree", apiLimiter, categoriesController.getCategoriesTree);
 router.get("/:id", apiLimiter, categoriesController.getCategoryById);
 
+router.post("/", apiLimiter, categoriesController.createCategory);
+
 export default router;

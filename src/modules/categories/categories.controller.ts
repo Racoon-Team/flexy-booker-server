@@ -20,3 +20,8 @@ export const getCategoryById = async (
     next(error);
   }
 };
+export const createCategory = async (req: Request, res: Response) => {
+  const category = await categoriesService.createCategory(req.body);
+
+  return res.status(201).json(category);
+};

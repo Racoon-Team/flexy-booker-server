@@ -57,9 +57,56 @@ export const getCategoriesTree = async (includeArchived = false) => {
     ORDER BY t.depth ASC, t.sort_order ASC;
   `;
 
-  const rows = await db.raw(query);
+  const result = await db.raw(query);
 
-  return rows.rows;
+  return result.rows;
+};
+
+export const findCategoryById = async (id: string) => {
+  return await db("categories").where({ id }).first();
+};
+
+export const findCategoryBySlug = async (slug: string) => {
+  return await db("categories").where({ slug }).first();
+};
+
+export const getMaxSortOrder = async (parentId: string | null) => {
+  const result = await db("categories")
+    .where({ parent_id: parentId })
+    .max("sort_order as max_sort_order")
+    .first();
+
+  return Number(result?.max_sort_order ?? 0);
+};
+
+export const createCategory = async (data: {
+  name: string;
+  slug: string;
+  parent_id?: string | null;
+  icon?: string;
+  description?: string;
+  sort_order: number;
+  show_on_homepage?: boolean;
+  show_in_search?: boolean;
+  allow_new_businesses?: boolean;
+  featured_on_homepage?: boolean;
+}) => {
+  const rows = await db("categories")
+    .insert({
+      name: data.name,
+      slug: data.slug,
+      parent_id: data.parent_id,
+      icon: data.icon,
+      description: data.description,
+      sort_order: data.sort_order,
+      show_on_homepage: data.show_on_homepage,
+      show_in_search: data.show_in_search,
+      allow_new_businesses: data.allow_new_businesses,
+      featured_on_homepage: data.featured_on_homepage,
+    })
+    .returning("*");
+
+  return rows[0];
 };
 
 export const getCategoryById = async (id: string) => {

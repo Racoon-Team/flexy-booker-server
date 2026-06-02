@@ -1,5 +1,5 @@
-import * as categoriesRepository from "./categories.repository";
 import { AppError } from "../../utils/AppError";
+import * as categoriesRepository from "./categories.repository";
 
 type CategoryRow = {
   id: string;
@@ -28,8 +28,8 @@ export const getCategoriesTree = async (includeArchived?: boolean) => {
     await categoriesRepository.getCategoriesTree(includeArchived);
 
   const parentCategories: CategoryTreeNode[] = categories
-    .filter((category: CategoryRow) => category.parent_id === null)
-    .map((parentCategory: CategoryRow) => ({
+    .filter((category) => category.parent_id === null)
+    .map((parentCategory) => ({
       id: parentCategory.id,
       name: parentCategory.name,
       slug: parentCategory.slug,
@@ -41,11 +41,10 @@ export const getCategoriesTree = async (includeArchived?: boolean) => {
     }));
 
   categories
-    .filter((category: CategoryRow) => category.parent_id !== null)
-    .forEach((childCategory: CategoryRow) => {
+    .filter((category) => category.parent_id !== null)
+    .forEach((childCategory) => {
       const matchingParentCategory = parentCategories.find(
-        (parentCategory: CategoryTreeNode) =>
-          parentCategory.id === childCategory.parent_id,
+        (parentCategory) => parentCategory.id === childCategory.parent_id,
       );
 
       if (matchingParentCategory) {
@@ -99,4 +98,56 @@ export const getCategoryById = async (id: string) => {
     created_at: category.created_at,
     updated_at: category.updated_at,
   };
+};
+export const createCategory = async (data: {
+  name: string;
+  slug?: string;
+  parent_id?: string | null;
+  icon?: string;
+  description?: string;
+}) => {
+  if (!data.name || data.name.trim() === "") {
+    throw new AppError("Name is required", 422);
+  }
+
+  const baseSlug =
+    data.slug ??
+    data.name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-");
+
+  let generatedSlug = baseSlug;
+  let slugCounter = 2;
+
+  while (await categoriesRepository.findCategoryBySlug(generatedSlug)) {
+    generatedSlug = `${baseSlug}-${slugCounter}`;
+    slugCounter++;
+  }
+
+  if (data.parent_id) {
+    const parentCategory = await categoriesRepository.findCategoryById(
+      data.parent_id,
+    );
+
+    if (!parentCategory) {
+      throw new AppError("Parent category not found", 422);
+    }
+
+    if (parentCategory.parent_id) {
+      throw new AppError("Only 2 levels of categories are allowed", 422);
+    }
+  }
+
+  const sortOrder =
+    (await categoriesRepository.getMaxSortOrder(data.parent_id ?? null)) + 1;
+
+  return await categoriesRepository.createCategory({
+    ...data,
+    slug: generatedSlug,
+    sort_order: sortOrder,
+  });
 };

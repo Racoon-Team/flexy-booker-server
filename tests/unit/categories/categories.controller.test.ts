@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import {
   getCategoriesTree,
   getCategoryById,
+  createCategory,
 } from "../../../src/modules/categories/categories.controller";
 import * as categoriesService from "../../../src/modules/categories/categories.services";
 
@@ -100,5 +101,30 @@ describe("categoriesController", () => {
     await getCategoryById(req, res, next);
 
     expect(next).toHaveBeenCalledWith(error);
+  });
+  
+  it("should create category", async () => {
+    const req = {
+      body: {
+        name: "Laptops",
+      },
+    } as Request;
+
+    const res = mockResponse();
+
+    const category = {
+      id: "1",
+      name: "Laptops",
+      slug: "laptops",
+    };
+
+    (categoriesService.createCategory as jest.Mock).mockResolvedValue(category);
+
+    await createCategory(req, res);
+
+    expect(categoriesService.createCategory).toHaveBeenCalledWith(req.body);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(category);
   });
 });
