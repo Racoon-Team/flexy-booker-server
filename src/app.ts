@@ -14,6 +14,7 @@ import servicesRoutes from "./modules/services/services.routes";
 import todoRoutes from "./modules/todo/todo.routes";
 import userRoutes from "./modules/users/users.routes";
 import { AppError } from "./utils/AppError";
+import categoriesRoutes from "./modules/categories/categories.routes";
 
 const app: Application = express();
 
@@ -33,6 +34,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/businesses", apiLimiter, requireAuth, businessesRoutes);
 app.use("/api/services", servicesRoutes);
+app.use("/api/categories", categoriesRoutes);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
