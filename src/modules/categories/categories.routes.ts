@@ -5,5 +5,6 @@ import * as categoriesController from "./categories.controller";
 const router = Router();
 
 router.get("/tree", apiLimiter, categoriesController.getCategoriesTree);
+router.get("/:id", apiLimiter, categoriesController.getCategoryById);
 
 export default router;
