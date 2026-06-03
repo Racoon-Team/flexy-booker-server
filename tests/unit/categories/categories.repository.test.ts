@@ -2,10 +2,18 @@ import { db } from "../../../src/db/knex";
 import {
   getCategoriesTree,
   getCategoryById,
+  findCategoryById,
+  findCategoryBySlug,
+  getMaxSortOrder,
+  createCategory,
+  updateCategory,
 } from "../../../src/modules/categories/categories.repository";
 
 jest.mock("../../../src/db/knex", () => ({
-  db: Object.assign(jest.fn(), { raw: jest.fn() }),
+  db: Object.assign(jest.fn(), {
+    raw: jest.fn(),
+    fn: { now: jest.fn().mockReturnValue("now()") },
+  }),
 }));
 
 describe("categoriesRepository", () => {
@@ -29,6 +37,70 @@ describe("categoriesRepository", () => {
     await getCategoriesTree(true);
 
     expect(db.raw).toHaveBeenCalled();
+  });
+
+  it("should find category by id", async () => {
+    const mockCategory = { id: "uuid-1", name: "Reparación" };
+    const firstMock = jest.fn().mockResolvedValue(mockCategory);
+    const whereMock = jest.fn().mockReturnValue({ first: firstMock });
+    (db as unknown as jest.Mock).mockReturnValue({ where: whereMock });
+
+    const result = await findCategoryById("uuid-1");
+
+    expect(db).toHaveBeenCalledWith("categories");
+    expect(whereMock).toHaveBeenCalledWith({ id: "uuid-1" });
+    expect(result).toEqual(mockCategory);
+  });
+
+  it("should find category by slug", async () => {
+    const mockCategory = { id: "uuid-1", slug: "reparacion" };
+    const firstMock = jest.fn().mockResolvedValue(mockCategory);
+    const whereMock = jest.fn().mockReturnValue({ first: firstMock });
+    (db as unknown as jest.Mock).mockReturnValue({ where: whereMock });
+
+    const result = await findCategoryBySlug("reparacion");
+
+    expect(db).toHaveBeenCalledWith("categories");
+    expect(whereMock).toHaveBeenCalledWith({ slug: "reparacion" });
+    expect(result).toEqual(mockCategory);
+  });
+
+  it("should return max sort order", async () => {
+    const firstMock = jest.fn().mockResolvedValue({ max_sort_order: 3 });
+    const maxMock = jest.fn().mockReturnValue({ first: firstMock });
+    const whereMock = jest.fn().mockReturnValue({ max: maxMock });
+    (db as unknown as jest.Mock).mockReturnValue({ where: whereMock });
+
+    const result = await getMaxSortOrder(null);
+
+    expect(result).toBe(3);
+  });
+
+  it("should return 0 if no sort order exists", async () => {
+    const firstMock = jest.fn().mockResolvedValue({ max_sort_order: null });
+    const maxMock = jest.fn().mockReturnValue({ first: firstMock });
+    const whereMock = jest.fn().mockReturnValue({ max: maxMock });
+    (db as unknown as jest.Mock).mockReturnValue({ where: whereMock });
+
+    const result = await getMaxSortOrder(null);
+
+    expect(result).toBe(0);
+  });
+
+  it("should create category and return new row", async () => {
+    const mockCategory = { id: "uuid-1", name: "Laptops", slug: "laptops" };
+    const returningMock = jest.fn().mockResolvedValue([mockCategory]);
+    const insertMock = jest.fn().mockReturnValue({ returning: returningMock });
+    (db as unknown as jest.Mock).mockReturnValue({ insert: insertMock });
+
+    const result = await createCategory({
+      name: "Laptops",
+      slug: "laptops",
+      sort_order: 1,
+    });
+
+    expect(db).toHaveBeenCalledWith("categories");
+    expect(result).toEqual(mockCategory);
   });
 
   it("should return null if category is not found", async () => {
@@ -118,5 +190,30 @@ describe("categoriesRepository", () => {
     const result = await getCategoryById("uuid-1");
 
     expect(result?.tags).toEqual([]);
+  });
+
+  it("should update category and return updated row", async () => {
+    const mockUpdated = { id: "uuid-1", name: "Reparación Updated" };
+    const returningMock = jest.fn().mockResolvedValue([mockUpdated]);
+    const updateMock = jest.fn().mockReturnValue({ returning: returningMock });
+    const whereMock = jest.fn().mockReturnValue({ update: updateMock });
+    (db as unknown as jest.Mock).mockReturnValue({ where: whereMock });
+
+    const result = await updateCategory("uuid-1", {
+      name: "Reparación Updated",
+    });
+
+    expect(result).toEqual(mockUpdated);
+  });
+
+  it("should return null if category to update is not found", async () => {
+    const returningMock = jest.fn().mockResolvedValue([]);
+    const updateMock = jest.fn().mockReturnValue({ returning: returningMock });
+    const whereMock = jest.fn().mockReturnValue({ update: updateMock });
+    (db as unknown as jest.Mock).mockReturnValue({ where: whereMock });
+
+    const result = await updateCategory("non-existent-id", { name: "Test" });
+
+    expect(result).toBeNull();
   });
 });
