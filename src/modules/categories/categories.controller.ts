@@ -25,3 +25,17 @@ export const createCategory = async (req: Request, res: Response) => {
 
   return res.status(201).json(category);
 };
+
+export const updateCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params as { id: string };
+    const updated = await categoriesService.updateCategory(id, req.body);
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+};

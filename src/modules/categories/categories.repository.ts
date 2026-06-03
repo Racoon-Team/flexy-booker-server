@@ -142,3 +142,28 @@ export const getCategoryById = async (id: string) => {
 
   return { category, tags };
 };
+
+export const updateCategory = async (
+  id: string,
+  data: {
+    name?: string;
+    slug?: string;
+    icon?: string;
+    description?: string;
+    parent_id?: string | null;
+    show_on_homepage?: boolean;
+    show_in_search?: boolean;
+    allow_new_businesses?: boolean;
+    featured_on_homepage?: boolean;
+  },
+) => {
+  const [updated] = await db("categories")
+    .where({ id })
+    .update({
+      ...data,
+      updated_at: db.fn.now(),
+    })
+    .returning("*");
+
+  return updated ?? null;
+};
