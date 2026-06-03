@@ -2,6 +2,7 @@ import * as categoriesRepository from "../../../src/modules/categories/categorie
 import {
   getCategoriesTree,
   getCategoryById,
+  createCategory,
 } from "../../../src/modules/categories/categories.services";
 import { AppError } from "../../../src/utils/AppError";
 
@@ -192,5 +193,87 @@ describe("categoriesServices", () => {
       name: "Reparación",
       slug: "reparacion",
     });
+  });
+  it("should throw error when name is empty", async () => {
+    await expect(
+      createCategory({
+        name: "",
+      }),
+    ).rejects.toThrow(AppError);
+  });
+
+  it("should create category with generated slug", async () => {
+    (
+      categoriesRepository.findCategoryBySlug as jest.Mock
+    ).mockResolvedValueOnce(null);
+
+    (categoriesRepository.getMaxSortOrder as jest.Mock).mockResolvedValue(0);
+
+    (categoriesRepository.createCategory as jest.Mock).mockResolvedValue({
+      id: "1",
+      name: "Laptops",
+      slug: "laptops",
+    });
+
+    const result = await createCategory({
+      name: "Laptops",
+    });
+
+    expect(result.slug).toBe("laptops");
+  });
+
+  it("should throw error when parent category does not exist", async () => {
+    (categoriesRepository.findCategoryBySlug as jest.Mock).mockResolvedValue(
+      null,
+    );
+
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue(
+      null,
+    );
+
+    await expect(
+      createCategory({
+        name: "Laptops",
+        parent_id: "123",
+      }),
+    ).rejects.toThrow("Parent category not found");
+  });
+
+  it("should throw error when parent category is not root", async () => {
+    (categoriesRepository.findCategoryBySlug as jest.Mock).mockResolvedValue(
+      null,
+    );
+
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "1",
+      parent_id: "999",
+    });
+
+    await expect(
+      createCategory({
+        name: "Laptops",
+        parent_id: "1",
+      }),
+    ).rejects.toThrow("Only 2 levels of categories are allowed");
+  });
+
+  it("should generate correct incremental slug when slug already exists", async () => {
+    (categoriesRepository.findCategoryBySlug as jest.Mock)
+      .mockResolvedValueOnce({ id: "1", slug: "laptops" })
+      .mockResolvedValueOnce(null);
+
+    (categoriesRepository.getMaxSortOrder as jest.Mock).mockResolvedValue(0);
+
+    (categoriesRepository.createCategory as jest.Mock).mockResolvedValue({
+      id: "2",
+      name: "Laptops",
+      slug: "laptops-2",
+    });
+
+    const result = await createCategory({
+      name: "Laptops",
+    });
+
+    expect(result.slug).toBe("laptops-2");
   });
 });
