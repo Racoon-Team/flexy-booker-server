@@ -6,8 +6,13 @@ const router = Router();
 
 router.get("/tree", apiLimiter, categoriesController.getCategoriesTree);
 router.get("/:id", apiLimiter, categoriesController.getCategoryById);
-
 router.post("/", apiLimiter, categoriesController.createCategory);
 router.patch("/:id", apiLimiter, categoriesController.updateCategory);
+router.patch("/:id/archive", apiLimiter, categoriesController.archiveCategory);
+router.patch(
+  "/:id/unarchive",
+  apiLimiter,
+  categoriesController.unarchiveCategory,
+);
 
 export default router;

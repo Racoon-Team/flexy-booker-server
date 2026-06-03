@@ -33,8 +33,41 @@ export const updateCategory = async (
 ) => {
   try {
     const { id } = req.params as { id: string };
+
     const updated = await categoriesService.updateCategory(id, req.body);
+
     res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const archiveCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params as { id: string };
+
+    const result = await categoriesService.archiveCategory(id);
+
+    return res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+export const unarchiveCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params as { id: string };
+
+    const result = await categoriesService.unarchiveCategory(id);
+
+    return res.status(200).json(result);
   } catch (error) {
     next(error);
   }

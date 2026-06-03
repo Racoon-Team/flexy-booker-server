@@ -4,6 +4,8 @@ import {
   getCategoryById,
   createCategory,
   updateCategory,
+  archiveCategory,
+  unarchiveCategory,
 } from "../../../src/modules/categories/categories.services";
 import { AppError } from "../../../src/utils/AppError";
 
@@ -276,6 +278,46 @@ describe("categoriesServices", () => {
     });
 
     expect(result.slug).toBe("laptops-2");
+  });
+
+  it("should archive category", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "1",
+      status: "active",
+    });
+
+    (categoriesRepository.updateCategory as jest.Mock).mockResolvedValue({
+      id: "1",
+      status: "archived",
+    });
+
+    const result = await archiveCategory("1");
+
+    expect(result.message).toBe("Category archived successfully");
+  });
+
+  it("should unarchive category", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "1",
+      status: "archived",
+    });
+
+    (categoriesRepository.updateCategory as jest.Mock).mockResolvedValue({
+      id: "1",
+      status: "active",
+    });
+
+    const result = await unarchiveCategory("1");
+
+    expect(result.message).toBe("Category unarchived successfully");
+  });
+
+  it("should throw error if category not found when archiving", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue(
+      null,
+    );
+
+    await expect(archiveCategory("bad-id")).rejects.toThrow(AppError);
   });
 
   it("should throw 404 if category to update is not found", async () => {
