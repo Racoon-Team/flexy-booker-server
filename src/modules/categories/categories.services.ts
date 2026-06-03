@@ -151,3 +151,57 @@ export const createCategory = async (data: {
     sort_order: sortOrder,
   });
 };
+
+export const updateCategory = async (
+  id: string,
+  data: {
+    name?: string;
+    slug?: string;
+    icon?: string;
+    description?: string;
+    parent_id?: string | null;
+    visibility?: {
+      show_on_homepage?: boolean;
+      show_in_search?: boolean;
+      allow_new_businesses?: boolean;
+      featured_on_homepage?: boolean;
+    };
+  },
+) => {
+  const existing = await categoriesRepository.findCategoryById(id);
+  if (!existing) {
+    throw new AppError("Category not found", 404);
+  }
+
+  if (data.slug && data.slug !== existing.slug) {
+    const slugExists = await categoriesRepository.findCategoryBySlug(data.slug);
+    if (slugExists) {
+      throw new AppError("Slug already exists", 409);
+    }
+  }
+
+  const incomingFeatured = data.visibility?.featured_on_homepage;
+  const currentShowOnHomepage = existing.show_on_homepage;
+  const incomingShowOnHomepage = data.visibility?.show_on_homepage;
+
+  if (
+    incomingFeatured === true &&
+    (incomingShowOnHomepage === false ||
+      (incomingShowOnHomepage === undefined && !currentShowOnHomepage))
+  ) {
+    throw new AppError(
+      "Cannot feature on homepage if show_on_homepage is false",
+      422,
+    );
+  }
+
+  const { visibility, ...rest } = data;
+  const updatePayload = {
+    ...rest,
+    ...(visibility ?? {}),
+  };
+
+  const updated = await categoriesRepository.updateCategory(id, updatePayload);
+
+  return updated;
+};
