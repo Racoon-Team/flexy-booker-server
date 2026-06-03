@@ -3,6 +3,7 @@ import {
   getCategoriesTree,
   getCategoryById,
   createCategory,
+  updateCategory,
 } from "../../../src/modules/categories/categories.services";
 import { AppError } from "../../../src/utils/AppError";
 
@@ -275,5 +276,68 @@ describe("categoriesServices", () => {
     });
 
     expect(result.slug).toBe("laptops-2");
+  });
+
+  it("should throw 404 if category to update is not found", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue(
+      null,
+    );
+
+    await expect(updateCategory("non-existent-id", {})).rejects.toThrow(
+      "Category not found",
+    );
+  });
+
+  it("should throw 409 if slug already exists in another category", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "uuid-1",
+      slug: "reparacion",
+      show_on_homepage: false,
+    });
+
+    (categoriesRepository.findCategoryBySlug as jest.Mock).mockResolvedValue({
+      id: "uuid-2",
+      slug: "salud",
+    });
+
+    await expect(updateCategory("uuid-1", { slug: "salud" })).rejects.toThrow(
+      "Slug already exists",
+    );
+  });
+
+  it("should throw 422 if featured_on_homepage is true and show_on_homepage is false", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "uuid-1",
+      slug: "reparacion",
+      show_on_homepage: false,
+    });
+
+    await expect(
+      updateCategory("uuid-1", {
+        visibility: { featured_on_homepage: true },
+      }),
+    ).rejects.toThrow(
+      "Cannot feature on homepage if show_on_homepage is false",
+    );
+  });
+
+  it("should update category successfully", async () => {
+    const mockUpdated = { id: "uuid-1", name: "Reparación Updated" };
+
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "uuid-1",
+      slug: "reparacion",
+      show_on_homepage: true,
+    });
+
+    (categoriesRepository.updateCategory as jest.Mock).mockResolvedValue(
+      mockUpdated,
+    );
+
+    const result = await updateCategory("uuid-1", {
+      name: "Reparación Updated",
+    });
+
+    expect(result).toEqual(mockUpdated);
   });
 });

@@ -3,6 +3,7 @@ import {
   getCategoriesTree,
   getCategoryById,
   createCategory,
+  updateCategory,
 } from "../../../src/modules/categories/categories.controller";
 import * as categoriesService from "../../../src/modules/categories/categories.services";
 
@@ -102,7 +103,7 @@ describe("categoriesController", () => {
 
     expect(next).toHaveBeenCalledWith(error);
   });
-  
+
   it("should create category", async () => {
     const req = {
       body: {
@@ -126,5 +127,44 @@ describe("categoriesController", () => {
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(category);
+  });
+
+  it("should update category", async () => {
+    const req = {
+      params: { id: "uuid-1" },
+      body: { name: "Reparación Updated" },
+    } as unknown as Request;
+
+    const res = mockResponse();
+    const next = jest.fn() as NextFunction;
+
+    const mockUpdated = { id: "uuid-1", name: "Reparación Updated" };
+    (categoriesService.updateCategory as jest.Mock).mockResolvedValue(
+      mockUpdated,
+    );
+
+    await updateCategory(req, res, next);
+
+    expect(categoriesService.updateCategory).toHaveBeenCalledWith("uuid-1", {
+      name: "Reparación Updated",
+    });
+    expect(res.json).toHaveBeenCalledWith(mockUpdated);
+  });
+
+  it("should call next with error if updateCategory throws", async () => {
+    const req = {
+      params: { id: "bad-id" },
+      body: {},
+    } as unknown as Request;
+
+    const res = mockResponse();
+    const next = jest.fn() as NextFunction;
+
+    const error = new Error("Category not found");
+    (categoriesService.updateCategory as jest.Mock).mockRejectedValue(error);
+
+    await updateCategory(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(error);
   });
 });
