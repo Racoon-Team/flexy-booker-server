@@ -256,4 +256,24 @@ describe("categoriesServices", () => {
       }),
     ).rejects.toThrow("Only 2 levels of categories are allowed");
   });
+
+  it("should generate correct incremental slug when slug already exists", async () => {
+    (categoriesRepository.findCategoryBySlug as jest.Mock)
+      .mockResolvedValueOnce({ id: "1", slug: "laptops" })
+      .mockResolvedValueOnce(null);
+
+    (categoriesRepository.getMaxSortOrder as jest.Mock).mockResolvedValue(0);
+
+    (categoriesRepository.createCategory as jest.Mock).mockResolvedValue({
+      id: "2",
+      name: "Laptops",
+      slug: "laptops-2",
+    });
+
+    const result = await createCategory({
+      name: "Laptops",
+    });
+
+    expect(result.slug).toBe("laptops-2");
+  });
 });
