@@ -1,6 +1,6 @@
 import { AppError } from "../../utils/AppError";
 import * as categoriesRepository from "./categories.repository";
-
+import { CATEGORY_STATUS } from "./categories.constants";
 type CategoryRow = {
   id: string;
   parent_id: string | null;
@@ -213,7 +213,7 @@ export const archiveCategory = async (id: string) => {
     throw new AppError("Category not found", 404);
   }
 
-  if (category.status === "archived") {
+  if (category.status === CATEGORY_STATUS.ARCHIVED) {
     return {
       message: "Category already archived",
     };
@@ -229,7 +229,7 @@ export const archiveCategory = async (id: string) => {
       : {};
 
   await categoriesRepository.updateCategory(id, {
-    status: "archived",
+    status: CATEGORY_STATUS.ARCHIVED,
     show_on_homepage: false,
     featured_on_homepage: false,
     allow_new_businesses: false,
@@ -247,14 +247,14 @@ export const unarchiveCategory = async (id: string) => {
     throw new AppError("Category not found", 404);
   }
 
-  if (category.status === "active") {
+  if (category.status === CATEGORY_STATUS.ACTIVE){
     return {
       message: "Category already active",
     };
   }
 
   await categoriesRepository.updateCategory(id, {
-    status: "active",
+   status: CATEGORY_STATUS.ACTIVE,
   });
 
   return {
