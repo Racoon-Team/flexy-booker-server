@@ -7,6 +7,9 @@ import {
   archiveCategory,
   unarchiveCategory,
   searchCategories,
+  searchTags,
+  addTagToCategory,
+  removeTagFromCategory,
 } from "../../../src/modules/categories/categories.controller";
 import * as categoriesService from "../../../src/modules/categories/categories.services";
 import { AppError } from "../../../src/utils/AppError";
@@ -237,17 +240,100 @@ describe("categoriesController", () => {
 
   it("should call next with error if searchCategories throws", async () => {
     const req = {
-      query: {},
+      query: { q: "movil", limit: "10" },
     } as unknown as Request;
 
     const res = mockResponse();
     const next = jest.fn() as NextFunction;
 
     const error = new AppError("Search query 'q' is required", 422);
+
     (categoriesService.searchCategories as jest.Mock).mockRejectedValue(error);
 
     await searchCategories(req, res, next);
 
     expect(next).toHaveBeenCalledWith(error);
+  });
+
+  it("should search tags with default values", async () => {
+    const req = {
+      query: {},
+    } as unknown as Request;
+
+    const res = mockResponse();
+
+    const mockResult = [{ id: "1", name: "tag1" }];
+
+    (categoriesService.searchTags as jest.Mock).mockResolvedValue(mockResult);
+
+    await searchTags(req, res, jest.fn());
+
+    expect(categoriesService.searchTags).toHaveBeenCalledWith("", 10);
+    expect(res.json).toHaveBeenCalledWith(mockResult);
+  });
+
+  it("should add tag to category", async () => {
+    const req = {
+      params: { id: "cat-1" },
+      body: { name: "tag1" },
+    } as unknown as Request;
+
+    const res = mockResponse();
+
+    const mockResult = { id: "tag-1" };
+
+    (categoriesService.addTagToCategory as jest.Mock).mockResolvedValue(
+      mockResult,
+    );
+
+    await addTagToCategory(req, res, jest.fn());
+
+    expect(categoriesService.addTagToCategory).toHaveBeenCalledWith(
+      "cat-1",
+      "tag1",
+    );
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(mockResult);
+  });
+  it("should remove tag from category", async () => {
+    const req = {
+      params: {
+        id: "cat-1",
+        tag_id: "tag-1",
+      },
+    } as unknown as Request;
+
+    const res = mockResponse();
+
+    (categoriesService.removeTagFromCategory as jest.Mock).mockResolvedValue(
+      undefined,
+    );
+
+    await removeTagFromCategory(req, res, jest.fn());
+
+    expect(categoriesService.removeTagFromCategory).toHaveBeenCalledWith(
+      "cat-1",
+      "tag-1",
+    );
+    expect(res.status).toHaveBeenCalledWith(204);
+  });
+
+  it("should handle array params in addTagToCategory", async () => {
+    const req = {
+      params: { id: ["cat-1"] },
+      body: { name: ["tag1"] },
+    } as unknown as Request;
+
+    const res = mockResponse();
+
+    (categoriesService.addTagToCategory as jest.Mock).mockResolvedValue({});
+
+    await addTagToCategory(req, res, jest.fn());
+
+    expect(categoriesService.addTagToCategory).toHaveBeenCalledWith(
+      "cat-1",
+      "tag1",
+    );
   });
 });

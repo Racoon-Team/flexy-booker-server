@@ -1,3 +1,4 @@
+import { CATEGORY_STATUS } from "../../../src/modules/categories/categories.constants";
 import * as categoriesRepository from "../../../src/modules/categories/categories.repository";
 import {
   getCategoriesTree,
@@ -7,6 +8,8 @@ import {
   archiveCategory,
   unarchiveCategory,
   searchCategories,
+  addTagToCategory,
+  removeTagFromCategory,
 } from "../../../src/modules/categories/categories.services";
 import { AppError } from "../../../src/utils/AppError";
 
@@ -452,6 +455,78 @@ describe("categoriesServices", () => {
     expect(categoriesRepository.searchCategories).toHaveBeenCalledWith(
       "test",
       50,
+    );
+  });
+
+  it("should return message if category is already archived", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "1",
+      status: CATEGORY_STATUS.ARCHIVED,
+    });
+
+    const result = await archiveCategory("1");
+
+    expect(result).toEqual({
+      message: "Category already archived",
+    });
+  });
+
+  it("should return message if category is already active", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "1",
+      status: CATEGORY_STATUS.ACTIVE,
+    });
+
+    const result = await unarchiveCategory("1");
+
+    expect(result).toEqual({
+      message: "Category already active",
+    });
+  });
+
+  it("should throw error if category not found when adding tag", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue(
+      null,
+    );
+
+    await expect(addTagToCategory("cat-1", "tag")).rejects.toThrow(
+      "Category not found",
+    );
+  });
+
+  it("should return existing tag if already attached", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "cat-1",
+    });
+
+    (categoriesRepository.findTagByName as jest.Mock).mockResolvedValue({
+      id: "tag-1",
+      name: "Phone",
+    });
+
+    (categoriesRepository.categoryHasTag as jest.Mock).mockResolvedValue(true);
+
+    const result = await addTagToCategory("cat-1", "Phone");
+
+    expect(result).toEqual({
+      id: "tag-1",
+      name: "Phone",
+    });
+
+    expect(categoriesRepository.attachTagToCategory).not.toHaveBeenCalled();
+  });
+
+  it("should throw error if tag is not associated", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "cat-1",
+    });
+
+    (categoriesRepository.detachTagFromCategory as jest.Mock).mockResolvedValue(
+      0,
+    );
+
+    await expect(removeTagFromCategory("cat-1", "tag-1")).rejects.toThrow(
+      "Tag not associated with category",
     );
   });
 });

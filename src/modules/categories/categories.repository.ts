@@ -204,3 +204,47 @@ export const searchCategories = async (q: string, limit: number) => {
 
   return rows;
 };
+export const findTagByName = async (name: string) => {
+  return db("tags").whereRaw("LOWER(name) = ?", name.toLowerCase()).first();
+};
+
+export const createTag = async (data: { name: string; slug: string }) => {
+  const [tag] = await db("tags").insert(data).returning("*");
+  return tag;
+};
+export const searchTags = async (query: string, limit: number) => {
+  return db("tags")
+    .whereRaw("LOWER(name) LIKE ?", [`${query.toLowerCase()}%`])
+    .limit(limit);
+};
+
+export const attachTagToCategory = async (
+  categoryId: string,
+  tagId: string,
+) => {
+  return db("category_tags").insert({
+    category_id: categoryId,
+    tag_id: tagId,
+  });
+};
+
+export const detachTagFromCategory = async (
+  categoryId: string,
+  tagId: string,
+) => {
+  return db("category_tags")
+    .where({
+      category_id: categoryId,
+      tag_id: tagId,
+    })
+    .delete();
+};
+
+export const categoryHasTag = async (categoryId: string, tagId: string) => {
+  return db("category_tags")
+    .where({
+      category_id: categoryId,
+      tag_id: tagId,
+    })
+    .first();
+};

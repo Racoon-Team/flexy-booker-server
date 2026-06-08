@@ -83,7 +83,67 @@ export const searchCategories = async (
     const limit = req.query.limit ? Number(req.query.limit) : 20;
 
     const results = await categoriesService.searchCategories(q, limit);
-    res.json(results);
+    return res.json(results);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addTagToCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const categoryId = Array.isArray(req.params.id)
+      ? req.params.id[0]
+      : req.params.id;
+
+    const name = Array.isArray(req.body.name)
+      ? req.body.name[0]
+      : req.body.name;
+
+    const result = await categoriesService.addTagToCategory(categoryId, name);
+
+    return res.status(201).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+export const removeTagFromCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const categoryId = Array.isArray(req.params.id)
+      ? req.params.id[0]
+      : req.params.id;
+
+    const tagId = Array.isArray(req.params.tag_id)
+      ? req.params.tag_id[0]
+      : req.params.tag_id;
+
+    await categoriesService.removeTagFromCategory(categoryId, tagId);
+
+    return res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchTags = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const query = String(req.query.query ?? "");
+    const limit = Number(req.query.limit ?? 10);
+
+    const result = await categoriesService.searchTags(query, limit);
+
+    return res.json(result);
   } catch (error) {
     next(error);
   }
