@@ -179,3 +179,28 @@ export const countActiveChildren = async (parentId: string) => {
 
   return Number(result?.count ?? 0);
 };
+
+export const searchCategories = async (q: string, limit: number) => {
+  const rows = await db("categories as c")
+    .leftJoin("categories as p", "c.parent_id", "p.id")
+    .leftJoin("businesses as b", "b.category_id", "c.id")
+    .select(
+      "c.id",
+      "c.name",
+      "c.slug",
+      "c.icon",
+      "c.status",
+      "p.id as parent_id",
+      "p.name as parent_name",
+      db.raw("COUNT(b.id)::int AS business_count"),
+    )
+    .where("c.status", "!=", "archived")
+    .andWhere(function () {
+      this.whereILike("c.name", `%${q}%`).orWhereILike("c.slug", `%${q}%`);
+    })
+    .groupBy("c.id", "c.name", "c.slug", "c.icon", "c.status", "p.id", "p.name")
+    .orderBy("c.name")
+    .limit(limit);
+
+  return rows;
+};
