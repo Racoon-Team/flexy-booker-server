@@ -1,6 +1,6 @@
 import { AppError } from "../../utils/AppError";
 import * as categoriesRepository from "./categories.repository";
-
+import { CATEGORY_STATUS } from "./categories.constants";
 type CategoryRow = {
   id: string;
   parent_id: string | null;
@@ -204,4 +204,60 @@ export const updateCategory = async (
   const updated = await categoriesRepository.updateCategory(id, updatePayload);
 
   return updated;
+};
+
+export const archiveCategory = async (id: string) => {
+  const category = await categoriesRepository.findCategoryById(id);
+
+  if (!category) {
+    throw new AppError("Category not found", 404);
+  }
+
+  if (category.status === CATEGORY_STATUS.ARCHIVED) {
+    return {
+      message: "Category already archived",
+    };
+  }
+
+  const childrenCount = await categoriesRepository.countActiveChildren(id);
+
+  const warning =
+    childrenCount > 0
+      ? {
+          warning: `This category has ${childrenCount} active subcategories.`,
+        }
+      : {};
+
+  await categoriesRepository.updateCategory(id, {
+    status: CATEGORY_STATUS.ARCHIVED,
+    show_on_homepage: false,
+    featured_on_homepage: false,
+    allow_new_businesses: false,
+  });
+
+  return {
+    message: "Category archived successfully",
+    ...warning,
+  };
+};
+export const unarchiveCategory = async (id: string) => {
+  const category = await categoriesRepository.findCategoryById(id);
+
+  if (!category) {
+    throw new AppError("Category not found", 404);
+  }
+
+  if (category.status === CATEGORY_STATUS.ACTIVE){
+    return {
+      message: "Category already active",
+    };
+  }
+
+  await categoriesRepository.updateCategory(id, {
+   status: CATEGORY_STATUS.ACTIVE,
+  });
+
+  return {
+    message: "Category unarchived successfully",
+  };
 };

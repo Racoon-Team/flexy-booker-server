@@ -4,6 +4,8 @@ import {
   getCategoryById,
   createCategory,
   updateCategory,
+  archiveCategory,
+  unarchiveCategory,
 } from "../../../src/modules/categories/categories.controller";
 import * as categoriesService from "../../../src/modules/categories/categories.services";
 
@@ -139,6 +141,7 @@ describe("categoriesController", () => {
     const next = jest.fn() as NextFunction;
 
     const mockUpdated = { id: "uuid-1", name: "Reparación Updated" };
+
     (categoriesService.updateCategory as jest.Mock).mockResolvedValue(
       mockUpdated,
     );
@@ -148,6 +151,7 @@ describe("categoriesController", () => {
     expect(categoriesService.updateCategory).toHaveBeenCalledWith("uuid-1", {
       name: "Reparación Updated",
     });
+
     expect(res.json).toHaveBeenCalledWith(mockUpdated);
   });
 
@@ -161,10 +165,49 @@ describe("categoriesController", () => {
     const next = jest.fn() as NextFunction;
 
     const error = new Error("Category not found");
+
     (categoriesService.updateCategory as jest.Mock).mockRejectedValue(error);
 
     await updateCategory(req, res, next);
 
     expect(next).toHaveBeenCalledWith(error);
+  });
+
+  it("should archive category", async () => {
+    const req = {
+      params: { id: "uuid-1" },
+    } as unknown as Request;
+
+    const res = mockResponse();
+    const next = jest.fn() as NextFunction;
+
+    (categoriesService.archiveCategory as jest.Mock).mockResolvedValue({
+      message: "Category archived successfully",
+    });
+
+    await archiveCategory(req, res, next);
+
+    expect(categoriesService.archiveCategory).toHaveBeenCalledWith("uuid-1");
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalled();
+  });
+
+  it("should unarchive category", async () => {
+    const req = {
+      params: { id: "uuid-1" },
+    } as unknown as Request;
+
+    const res = mockResponse();
+    const next = jest.fn() as NextFunction;
+
+    (categoriesService.unarchiveCategory as jest.Mock).mockResolvedValue({
+      message: "Category unarchived successfully",
+    });
+
+    await unarchiveCategory(req, res, next);
+
+    expect(categoriesService.unarchiveCategory).toHaveBeenCalledWith("uuid-1");
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalled();
   });
 });

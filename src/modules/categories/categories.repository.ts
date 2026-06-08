@@ -1,5 +1,5 @@
 import { db } from "../../db/knex";
-
+import { CATEGORY_STATUS } from "./categories.constants";
 export const getCategoriesTree = async (includeArchived = false) => {
   const query = `
     WITH RECURSIVE tree AS (
@@ -151,6 +151,7 @@ export const updateCategory = async (
     icon?: string;
     description?: string;
     parent_id?: string | null;
+    status?: string;
     show_on_homepage?: boolean;
     show_in_search?: boolean;
     allow_new_businesses?: boolean;
@@ -166,4 +167,15 @@ export const updateCategory = async (
     .returning("*");
 
   return updated ?? null;
+};
+export const countActiveChildren = async (parentId: string) => {
+  const result = await db("categories")
+    .where({
+      parent_id: parentId,
+      status: CATEGORY_STATUS.ACTIVE,
+    })
+    .count("* as count")
+    .first();
+
+  return Number(result?.count ?? 0);
 };
