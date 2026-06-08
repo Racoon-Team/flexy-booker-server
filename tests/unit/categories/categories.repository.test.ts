@@ -7,6 +7,7 @@ import {
   getMaxSortOrder,
   createCategory,
   updateCategory,
+  searchCategories,
 } from "../../../src/modules/categories/categories.repository";
 
 jest.mock("../../../src/db/knex", () => ({
@@ -215,5 +216,24 @@ describe("categoriesRepository", () => {
     const result = await updateCategory("non-existent-id", { name: "Test" });
 
     expect(result).toBeNull();
+  });
+
+  it("should return search results", async () => {
+    const mockRows = [{ id: "uuid-1", name: "Electrónica & móviles" }];
+    const limitMock = jest.fn().mockResolvedValue(mockRows);
+    const orderByMock = jest.fn().mockReturnValue({ limit: limitMock });
+    const groupByMock = jest.fn().mockReturnValue({ orderBy: orderByMock });
+    const andWhereMock = jest.fn().mockReturnValue({ groupBy: groupByMock });
+    const whereMock = jest.fn().mockReturnValue({ andWhere: andWhereMock });
+    const selectMock = jest.fn().mockReturnValue({ where: whereMock });
+    const leftJoin2Mock = jest.fn().mockReturnValue({ select: selectMock });
+    const leftJoin1Mock = jest
+      .fn()
+      .mockReturnValue({ leftJoin: leftJoin2Mock });
+    (db as unknown as jest.Mock).mockReturnValue({ leftJoin: leftJoin1Mock });
+
+    const result = await searchCategories("movil", 20);
+
+    expect(result).toEqual(mockRows);
   });
 });

@@ -6,6 +6,7 @@ import {
   updateCategory,
   archiveCategory,
   unarchiveCategory,
+  searchCategories,
 } from "../../../src/modules/categories/categories.services";
 import { AppError } from "../../../src/utils/AppError";
 
@@ -381,5 +382,76 @@ describe("categoriesServices", () => {
     });
 
     expect(result).toEqual(mockUpdated);
+  });
+
+  it("should throw 422 if q is empty", async () => {
+    await expect(searchCategories("")).rejects.toThrow(
+      "Search query 'q' is required",
+    );
+  });
+
+  it("should return search results", async () => {
+    const mockRows = [
+      {
+        id: "uuid-1",
+        name: "Electrónica & móviles",
+        slug: "electronica-moviles",
+        icon: null,
+        status: "active",
+        business_count: 0,
+        parent_id: "uuid-p",
+        parent_name: "Reparación",
+      },
+    ];
+    (categoriesRepository.searchCategories as jest.Mock).mockResolvedValue(
+      mockRows,
+    );
+
+    const result = await searchCategories("movil");
+
+    expect(result).toEqual([
+      {
+        id: "uuid-1",
+        name: "Electrónica & móviles",
+        slug: "electronica-moviles",
+        icon: null,
+        status: "active",
+        business_count: 0,
+        parent: { id: "uuid-p", name: "Reparación" },
+      },
+    ]);
+  });
+
+  it("should return null parent if category has no parent", async () => {
+    const mockRows = [
+      {
+        id: "uuid-1",
+        name: "Reparación",
+        slug: "reparacion",
+        icon: "⚡",
+        status: "active",
+        business_count: 0,
+        parent_id: null,
+        parent_name: null,
+      },
+    ];
+    (categoriesRepository.searchCategories as jest.Mock).mockResolvedValue(
+      mockRows,
+    );
+
+    const result = await searchCategories("repar");
+
+    expect(result[0].parent).toBeNull();
+  });
+
+  it("should cap limit at 50", async () => {
+    (categoriesRepository.searchCategories as jest.Mock).mockResolvedValue([]);
+
+    await searchCategories("test", 100);
+
+    expect(categoriesRepository.searchCategories).toHaveBeenCalledWith(
+      "test",
+      50,
+    );
   });
 });

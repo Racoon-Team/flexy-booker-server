@@ -6,8 +6,10 @@ import {
   updateCategory,
   archiveCategory,
   unarchiveCategory,
+  searchCategories,
 } from "../../../src/modules/categories/categories.controller";
 import * as categoriesService from "../../../src/modules/categories/categories.services";
+import { AppError } from "../../../src/utils/AppError";
 
 jest.mock("../../../src/modules/categories/categories.services");
 
@@ -209,5 +211,43 @@ describe("categoriesController", () => {
     expect(categoriesService.unarchiveCategory).toHaveBeenCalledWith("uuid-1");
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalled();
+  });
+
+  it("should return search results", async () => {
+    const req = {
+      query: { q: "movil", limit: "10" },
+    } as unknown as Request;
+
+    const res = mockResponse();
+    const next = jest.fn() as NextFunction;
+
+    const mockResults = [{ id: "uuid-1", name: "Electrónica & móviles" }];
+    (categoriesService.searchCategories as jest.Mock).mockResolvedValue(
+      mockResults,
+    );
+
+    await searchCategories(req, res, next);
+
+    expect(categoriesService.searchCategories).toHaveBeenCalledWith(
+      "movil",
+      10,
+    );
+    expect(res.json).toHaveBeenCalledWith(mockResults);
+  });
+
+  it("should call next with error if searchCategories throws", async () => {
+    const req = {
+      query: {},
+    } as unknown as Request;
+
+    const res = mockResponse();
+    const next = jest.fn() as NextFunction;
+
+    const error = new AppError("Search query 'q' is required", 422);
+    (categoriesService.searchCategories as jest.Mock).mockRejectedValue(error);
+
+    await searchCategories(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(error);
   });
 });
