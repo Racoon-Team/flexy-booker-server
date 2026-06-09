@@ -247,17 +247,37 @@ export const unarchiveCategory = async (id: string) => {
     throw new AppError("Category not found", 404);
   }
 
-  if (category.status === CATEGORY_STATUS.ACTIVE){
+  if (category.status === CATEGORY_STATUS.ACTIVE) {
     return {
       message: "Category already active",
     };
   }
 
   await categoriesRepository.updateCategory(id, {
-   status: CATEGORY_STATUS.ACTIVE,
+    status: CATEGORY_STATUS.ACTIVE,
   });
 
   return {
     message: "Category unarchived successfully",
   };
+};
+
+export const searchCategories = async (q: string, limit: number = 20) => {
+  if (!q || q.trim() === "") {
+    throw new AppError("Search query 'q' is required", 422);
+  }
+
+  const safeLimit = Math.min(limit, 50);
+
+  const rows = await categoriesRepository.searchCategories(q.trim(), safeLimit);
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    icon: row.icon,
+    status: row.status,
+    business_count: row.business_count,
+    parent: row.parent_id ? { id: row.parent_id, name: row.parent_name } : null,
+  }));
 };

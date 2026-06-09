@@ -72,3 +72,19 @@ export const unarchiveCategory = async (
     next(error);
   }
 };
+
+export const searchCategories = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const q = req.query.q as string;
+    const limit = req.query.limit ? Number(req.query.limit) : 20;
+
+    const results = await categoriesService.searchCategories(q, limit);
+    res.json(results);
+  } catch (error) {
+    next(error);
+  }
+};
