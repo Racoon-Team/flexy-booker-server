@@ -15,5 +15,8 @@ router.patch(
   apiLimiter,
   categoriesController.unarchiveCategory,
 );
+router.post("/:id/tags", apiLimiter, categoriesController.addTagToCategory);
+router.delete("/:id/tags/:tag_id", apiLimiter, categoriesController.removeTagFromCategory);
 
+router.get("/tags", apiLimiter, categoriesController.searchTags);
 export default router;

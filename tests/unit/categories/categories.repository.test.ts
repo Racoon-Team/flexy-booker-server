@@ -8,6 +8,12 @@ import {
   createCategory,
   updateCategory,
   searchCategories,
+  categoryHasTag,
+  detachTagFromCategory,
+  attachTagToCategory,
+  searchTags,
+  createTag,
+  findTagByName,
 } from "../../../src/modules/categories/categories.repository";
 
 jest.mock("../../../src/db/knex", () => ({
@@ -235,5 +241,114 @@ describe("categoriesRepository", () => {
     const result = await searchCategories("movil", 20);
 
     expect(result).toEqual(mockRows);
+  });
+
+  it("should find tag by name (case insensitive)", async () => {
+    const mockTag = { id: "tag-1", name: "Phone" };
+
+    const firstMock = jest.fn().mockResolvedValue(mockTag);
+    const whereRawMock = jest.fn().mockReturnValue({ first: firstMock });
+
+    (db as unknown as jest.Mock).mockReturnValue({
+      whereRaw: whereRawMock,
+    });
+
+    const result = await findTagByName("phone");
+
+    expect(whereRawMock).toHaveBeenCalledWith("LOWER(name) = ?", "phone");
+    expect(result).toEqual(mockTag);
+  });
+
+  it("should create tag", async () => {
+    const mockTag = { id: "tag-1", name: "Phone", slug: "phone" };
+
+    const returningMock = jest.fn().mockResolvedValue([mockTag]);
+    const insertMock = jest.fn().mockReturnValue({
+      returning: returningMock,
+    });
+
+    (db as unknown as jest.Mock).mockReturnValue({
+      insert: insertMock,
+    });
+
+    const result = await createTag({
+      name: "Phone",
+      slug: "phone",
+    });
+
+    expect(insertMock).toHaveBeenCalled();
+    expect(result).toEqual(mockTag);
+  });
+
+  it("should search tags with limit", async () => {
+    const mockTags = [{ id: "1", name: "iphone" }];
+
+    const limitMock = jest.fn().mockReturnValue(mockTags);
+    const whereRawMock = jest.fn().mockReturnValue({
+      limit: limitMock,
+    });
+
+    (db as unknown as jest.Mock).mockReturnValue({
+      whereRaw: whereRawMock,
+    });
+
+    const result = await searchTags("ip", 5);
+
+    expect(whereRawMock).toHaveBeenCalledWith("LOWER(name) LIKE ?", ["ip%"]);
+    expect(limitMock).toHaveBeenCalledWith(5);
+    expect(result).toEqual(mockTags);
+  });
+
+  it("should attach tag to category", async () => {
+    const insertMock = jest.fn().mockResolvedValue({});
+
+    (db as unknown as jest.Mock).mockReturnValue({
+      insert: insertMock,
+    });
+
+    await attachTagToCategory("cat-1", "tag-1");
+
+    expect(insertMock).toHaveBeenCalledWith({
+      category_id: "cat-1",
+      tag_id: "tag-1",
+    });
+  });
+  it("should detach tag from category", async () => {
+    const deleteMock = jest.fn().mockResolvedValue(1);
+    const whereMock = jest.fn().mockReturnValue({
+      delete: deleteMock,
+    });
+
+    (db as unknown as jest.Mock).mockReturnValue({
+      where: whereMock,
+    });
+
+    await detachTagFromCategory("cat-1", "tag-1");
+
+    expect(whereMock).toHaveBeenCalledWith({
+      category_id: "cat-1",
+      tag_id: "tag-1",
+    });
+  });
+
+  it("should check if category has tag", async () => {
+    const firstMock = jest.fn().mockResolvedValue({ id: 1 });
+
+    const whereMock = jest.fn().mockReturnValue({
+      first: firstMock,
+    });
+
+    (db as unknown as jest.Mock).mockReturnValue({
+      where: whereMock,
+    });
+
+    const result = await categoryHasTag("cat-1", "tag-1");
+
+    expect(whereMock).toHaveBeenCalledWith({
+      category_id: "cat-1",
+      tag_id: "tag-1",
+    });
+
+    expect(result).toEqual({ id: 1 });
   });
 });

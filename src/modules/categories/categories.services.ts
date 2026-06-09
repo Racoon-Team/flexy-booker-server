@@ -281,3 +281,65 @@ export const searchCategories = async (q: string, limit: number = 20) => {
     parent: row.parent_id ? { id: row.parent_id, name: row.parent_name } : null,
   }));
 };
+const generateSlug = (text: string) => {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+};
+
+export const addTagToCategory = async (categoryId: string, name: string) => {
+  const category = await categoriesRepository.findCategoryById(categoryId);
+
+  if (!category) {
+    throw new AppError("Category not found", 404);
+  }
+
+  let tag = await categoriesRepository.findTagByName(name);
+
+  if (!tag) {
+    const slug = generateSlug(name);
+    tag = await categoriesRepository.createTag({ name, slug });
+  }
+
+  const exists = await categoriesRepository.categoryHasTag(categoryId, tag.id);
+
+  if (exists) {
+    return tag;
+  }
+
+  await categoriesRepository.attachTagToCategory(categoryId, tag.id);
+
+  return tag;
+};
+
+export const removeTagFromCategory = async (
+  categoryId: string,
+  tagId: string,
+) => {
+  const category = await categoriesRepository.findCategoryById(categoryId);
+
+  if (!category) {
+    throw new AppError("Category not found", 404);
+  }
+
+  const deleted = await categoriesRepository.detachTagFromCategory(
+    categoryId,
+    tagId,
+  );
+
+  if (!deleted) {
+    throw new AppError("Tag not associated with category", 404);
+  }
+
+  return;
+};
+
+export const searchTags = async (query: string, limit = 10) => {
+  const safeLimit = Math.min(limit, 50);
+
+  return categoriesRepository.searchTags(query, safeLimit);
+};
