@@ -14,6 +14,7 @@ import {
   searchTags,
   createTag,
   findTagByName,
+  getCategoryStats,
 } from "../../../src/modules/categories/categories.repository";
 
 jest.mock("../../../src/db/knex", () => ({
@@ -350,5 +351,60 @@ describe("categoriesRepository", () => {
     });
 
     expect(result).toEqual({ id: 1 });
+  });
+
+  it("should return category stats", async () => {
+    const firstBusinessesMock = jest.fn().mockResolvedValue({
+      total: "5",
+    });
+
+    const whereBusinessesMock = jest.fn().mockReturnValue({
+      count: jest.fn().mockReturnValue({
+        first: firstBusinessesMock,
+      }),
+    });
+
+    const firstServicesMock = jest.fn().mockResolvedValue({
+      total: "12",
+    });
+
+    const whereServicesMock = jest.fn().mockReturnValue({
+      count: jest.fn().mockReturnValue({
+        first: firstServicesMock,
+      }),
+    });
+
+    const joinMock = jest.fn().mockReturnValue({
+      where: whereServicesMock,
+    });
+
+    (db as unknown as jest.Mock)
+      .mockReturnValueOnce({
+        where: whereBusinessesMock,
+      })
+      .mockReturnValueOnce({
+        join: joinMock,
+      });
+
+    const result = await getCategoryStats("cat-1");
+
+    expect(result).toEqual({
+      businesses: {
+        total: 5,
+        delta: null,
+        delta_label: null,
+      },
+      services_listed: {
+        total: 12,
+        delta: null,
+      },
+      searches_per_month: {
+        total: null,
+        delta_percent: null,
+      },
+      conversion_rate: {
+        percent: null,
+      },
+    });
   });
 });

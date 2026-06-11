@@ -248,3 +248,37 @@ export const categoryHasTag = async (categoryId: string, tagId: string) => {
     })
     .first();
 };
+export const getCategoryStats = async (categoryId: string) => {
+  const businesses = await db("businesses")
+    .where({
+      category_id: categoryId,
+      status: "active",
+    })
+    .count("* as total")
+    .first();
+
+  const services = await db("services as s")
+    .join("businesses as b", "s.business_id", "b.id")
+    .where("b.category_id", categoryId)
+    .count("s.id as total")
+    .first();
+
+  return {
+    businesses: {
+      total: Number(businesses?.total ?? 0),
+      delta: null,
+      delta_label: null,
+    },
+    services_listed: {
+      total: Number(services?.total ?? 0),
+      delta: null,
+    },
+    searches_per_month: {
+      total: null,
+      delta_percent: null,
+    },
+    conversion_rate: {
+      percent: null,
+    },
+  };
+};
