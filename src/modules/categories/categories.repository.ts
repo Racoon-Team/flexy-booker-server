@@ -273,12 +273,5 @@ export const getCategoryStats = async (categoryId: string) => {
       total: Number(services?.total ?? 0),
       delta: null,
     },
-    searches_per_month: {
-      total: null,
-      delta_percent: null,
-    },
-    conversion_rate: {
-      percent: null,
-    },
   };
 };

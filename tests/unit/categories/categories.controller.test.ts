@@ -356,13 +356,6 @@ describe("categoriesController", () => {
         total: 25,
         delta: null,
       },
-      searches_per_month: {
-        total: null,
-        delta_percent: null,
-      },
-      conversion_rate: {
-        percent: null,
-      },
     };
 
     (categoriesService.getCategoryStats as jest.Mock).mockResolvedValue(
