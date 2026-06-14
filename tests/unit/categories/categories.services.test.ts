@@ -10,6 +10,7 @@ import {
   searchCategories,
   addTagToCategory,
   removeTagFromCategory,
+  getCategoryStats,
 } from "../../../src/modules/categories/categories.services";
 import { AppError } from "../../../src/utils/AppError";
 
@@ -528,5 +529,47 @@ describe("categoriesServices", () => {
     await expect(removeTagFromCategory("cat-1", "tag-1")).rejects.toThrow(
       "Tag not associated with category",
     );
+  });
+
+  it("should return category stats", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue({
+      id: "cat-1",
+    });
+
+    const mockStats = {
+      businesses: {
+        total: 10,
+        delta: null,
+        delta_label: null,
+      },
+      services_listed: {
+        total: 25,
+        delta: null,
+      },
+    };
+
+    (categoriesRepository.getCategoryStats as jest.Mock).mockResolvedValue(
+      mockStats,
+    );
+
+    const result = await getCategoryStats("cat-1");
+
+    expect(categoriesRepository.findCategoryById).toHaveBeenCalledWith("cat-1");
+
+    expect(categoriesRepository.getCategoryStats).toHaveBeenCalledWith("cat-1");
+
+    expect(result).toEqual(mockStats);
+  });
+
+  it("should throw error if category does not exist when getting stats", async () => {
+    (categoriesRepository.findCategoryById as jest.Mock).mockResolvedValue(
+      null,
+    );
+
+    await expect(getCategoryStats("bad-id")).rejects.toThrow(
+      "Category not found",
+    );
+
+    expect(categoriesRepository.getCategoryStats).not.toHaveBeenCalled();
   });
 });

@@ -10,6 +10,7 @@ import {
   searchTags,
   addTagToCategory,
   removeTagFromCategory,
+  getCategoryStats,
 } from "../../../src/modules/categories/categories.controller";
 import * as categoriesService from "../../../src/modules/categories/categories.services";
 import { AppError } from "../../../src/utils/AppError";
@@ -335,5 +336,51 @@ describe("categoriesController", () => {
       "cat-1",
       "tag1",
     );
+  });
+
+  it("should return category stats", async () => {
+    const req = {
+      params: { id: "cat-1" },
+    } as unknown as Request;
+
+    const res = mockResponse();
+    const next = jest.fn() as NextFunction;
+
+    const mockStats = {
+      businesses: {
+        total: 10,
+        delta: null,
+        delta_label: null,
+      },
+      services_listed: {
+        total: 25,
+        delta: null,
+      },
+    };
+
+    (categoriesService.getCategoryStats as jest.Mock).mockResolvedValue(
+      mockStats,
+    );
+
+    await getCategoryStats(req, res, next);
+
+    expect(categoriesService.getCategoryStats).toHaveBeenCalledWith("cat-1");
+    expect(res.json).toHaveBeenCalledWith(mockStats);
+  });
+  it("should call next with error if getCategoryStats throws", async () => {
+    const req = {
+      params: { id: "bad-id" },
+    } as unknown as Request;
+
+    const res = mockResponse();
+    const next = jest.fn() as NextFunction;
+
+    const error = new AppError("Category not found", 404);
+
+    (categoriesService.getCategoryStats as jest.Mock).mockRejectedValue(error);
+
+    await getCategoryStats(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(error);
   });
 });

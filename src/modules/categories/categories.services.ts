@@ -99,6 +99,18 @@ export const getCategoryById = async (id: string) => {
     updated_at: category.updated_at,
   };
 };
+
+
+export const getCategoryStats = async (id: string) => {
+  const category = await categoriesRepository.findCategoryById(id);
+
+  if (!category) {
+    throw new AppError("Category not found", 404);
+  }
+
+  return categoriesRepository.getCategoryStats(id);
+};
+
 export const createCategory = async (data: {
   name: string;
   slug?: string;
