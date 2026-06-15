@@ -37,7 +37,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.5.3",
+    "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
