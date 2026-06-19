@@ -7,6 +7,7 @@ const router = Router();
 router.get("/tree", apiLimiter, categoriesController.getCategoriesTree);
 router.get("/search", apiLimiter, categoriesController.searchCategories);
 router.get("/:id/stats", apiLimiter, categoriesController.getCategoryStats);
+router.get("/tags", apiLimiter, categoriesController.searchTags);
 router.get("/:id", apiLimiter, categoriesController.getCategoryById);
 router.post("/", apiLimiter, categoriesController.createCategory);
 router.patch("/:id", apiLimiter, categoriesController.updateCategory);
@@ -23,5 +24,4 @@ router.delete(
   categoriesController.removeTagFromCategory,
 );
 
-router.get("/tags", apiLimiter, categoriesController.searchTags);
 export default router;
