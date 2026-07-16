@@ -22,7 +22,7 @@ export const requireAuth = async (
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string,
-    ) as JwtPayload;
+    ) as JwtPayload & { userId: string; role: string };
 
     const session = await findValidSession(decoded.userId, token);
 
@@ -41,4 +41,21 @@ export const requireAuth = async (
     logger.warn("Auth rejected: invalid token", { url: req.originalUrl });
     next(new AppError("Unauthorized - Invalid token", 401));
   }
+};
+
+export const requireAdmin = (
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) => {
+  if (!req.user || req.user.role !== "admin") {
+    logger.warn("Admin access rejected: insufficient role", {
+      userId: req.user?.userId,
+      role: req.user?.role,
+      url: req.originalUrl,
+    });
+    return next(new AppError("Forbidden - Admin access required", 403));
+  }
+
+  next();
 };
