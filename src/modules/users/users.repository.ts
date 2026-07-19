@@ -14,8 +14,10 @@ export const createUser = async (data: CreateUserParams) => {
       password_hash: data.passwordHash,
       role: data.role ?? "client",
       phone: data.phone,
+      status: data.verified ? "active" : "pending",
+      email_verified: data.verified,
     })
-    .returning(["id", "first_name", "last_name", "email", "role"]);
+    .returning(["id", "first_name", "last_name", "email", "role", "status"]);
 
   return { rows };
 };
@@ -55,4 +57,26 @@ export const findValidSession = async (userId: string, token: string) => {
     .whereNull("revoked_at")
     .where("expires_at", ">", db.fn.now())
     .first();
+};
+
+export const createAuditLog = async (data: {
+  adminId: string;
+  action: string;
+  targetType: string;
+  targetId: string;
+  before?: object | null;
+  after?: object | null;
+  ipAddress: string;
+
+}) => {
+  await db("audit_log").insert({
+    admin_id: data.adminId,
+    action: data.action,
+    target_type: data.targetType,
+    target_id: data.targetId,
+    before: data.before ?? null,
+    after: data.after ?? null,
+    ip_address: data.ipAddress,
+  
+  });
 };

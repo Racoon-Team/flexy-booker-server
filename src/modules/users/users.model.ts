@@ -1,5 +1,5 @@
-export type UserRole = 'client' | 'owner' | 'admin';
-export type UserStatus = 'pending' | 'active' | 'suspended' | 'deleted';
+export type UserRole = "client" | "owner" | "admin";
+export type UserStatus = "pending" | "active" | "suspended" | "deleted";
 
 export interface User {
   id: string;
@@ -40,4 +40,5 @@ export interface CreateUserParams {
   passwordHash: string;
   role?: UserRole;
   phone?: string;
+  verified: boolean;
 }

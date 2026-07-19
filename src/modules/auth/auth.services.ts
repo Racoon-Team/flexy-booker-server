@@ -44,6 +44,7 @@ export const signUp = async (data: SignUpDataTransferObject) => {
     passwordHash,
     role: finalRole,
     phone,
+    verified: false,
   });
 
   const user = result.rows[0];

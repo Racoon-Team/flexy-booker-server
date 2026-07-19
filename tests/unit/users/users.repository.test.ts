@@ -30,6 +30,7 @@ describe("Users Repository", () => {
         email: "john@test.com",
         passwordHash: "hashed",
         role: "client",
+        verified: false,
       });
 
       expect(db).toHaveBeenCalledWith("users");
@@ -40,6 +41,8 @@ describe("Users Repository", () => {
         password_hash: "hashed",
         role: "client",
         phone: undefined,
+        status: "pending",
+        email_verified: false,
       });
       expect(returningMock).toHaveBeenCalledWith([
         "id",
@@ -47,6 +50,7 @@ describe("Users Repository", () => {
         "last_name",
         "email",
         "role",
+        "status",
       ]);
       expect(result).toEqual({ rows: [mockUser] });
     });
@@ -69,6 +73,7 @@ describe("Users Repository", () => {
         firstName: "John",
         email: "john@test.com",
         passwordHash: "hashed",
+        verified: false,
       });
 
       expect(insertMock).toHaveBeenCalledWith(
@@ -117,7 +122,9 @@ describe("Users Repository", () => {
 
       const insertMock = jest.fn().mockResolvedValue([1]);
 
-      (db as unknown as Record<string, unknown>).fn = { now: jest.fn().mockReturnValue("now") };
+      (db as unknown as Record<string, unknown>).fn = {
+        now: jest.fn().mockReturnValue("now"),
+      };
       (db as unknown as jest.Mock).mockImplementation((table: string) => {
         if (table === "sessions") {
           return {
@@ -149,7 +156,9 @@ describe("Users Repository", () => {
       const whereNullMock = jest.fn().mockReturnValue({ update: updateMock });
       const whereMock = jest.fn().mockReturnValue({ whereNull: whereNullMock });
 
-      (db as unknown as Record<string, unknown>).fn = { now: jest.fn().mockReturnValue("now") };
+      (db as unknown as Record<string, unknown>).fn = {
+        now: jest.fn().mockReturnValue("now"),
+      };
       (db as unknown as jest.Mock).mockReturnValue({ where: whereMock });
 
       await usersRepository.revokeAllSessions("user-1");
@@ -166,12 +175,12 @@ describe("Users Repository", () => {
       const mockSession = { id: 1, user_id: "user-1" };
       const firstMock = jest.fn().mockResolvedValue(mockSession);
       const whereDateMock = jest.fn().mockReturnValue({ first: firstMock });
-      const whereNullMock = jest
-        .fn()
-        .mockReturnValue({ where: whereDateMock });
+      const whereNullMock = jest.fn().mockReturnValue({ where: whereDateMock });
       const whereMock = jest.fn().mockReturnValue({ whereNull: whereNullMock });
 
-      (db as unknown as Record<string, unknown>).fn = { now: jest.fn().mockReturnValue("now") };
+      (db as unknown as Record<string, unknown>).fn = {
+        now: jest.fn().mockReturnValue("now"),
+      };
       (db as unknown as jest.Mock).mockReturnValue({ where: whereMock });
 
       const result = await usersRepository.findValidSession(
