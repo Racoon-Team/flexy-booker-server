@@ -199,3 +199,42 @@ describe("Users Repository", () => {
     });
   });
 });
+describe("getUsers", () => {
+  it("should return all users ordered by created_at desc", async () => {
+    const mockUsers = [
+      {
+        id: "uuid-1",
+        first_name: "John",
+        last_name: "Doe",
+        email: "john@test.com",
+        role: "client",
+        status: "active",
+        created_at: "2026-07-23T00:00:00Z",
+      },
+    ];
+
+    const orderByMock = jest.fn().mockResolvedValue(mockUsers);
+    const selectMock = jest.fn().mockReturnValue({
+      orderBy: orderByMock,
+    });
+
+    (db as unknown as jest.Mock).mockReturnValue({
+      select: selectMock,
+    });
+
+    const result = await usersRepository.getUsers();
+
+    expect(db).toHaveBeenCalledWith("users");
+    expect(selectMock).toHaveBeenCalledWith(
+      "id",
+      "first_name",
+      "last_name",
+      "email",
+      "role",
+      "status",
+      "created_at",
+    );
+    expect(orderByMock).toHaveBeenCalledWith("created_at", "desc");
+    expect(result).toEqual({ rows: mockUsers });
+  });
+});

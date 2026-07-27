@@ -40,3 +40,16 @@ export const createUser = async (
     next(error);
   }
 };
+
+export const getUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const users = await usersService.getUsers();
+    res.status(200).json(users);
+  } catch (error) {
+    next(error);
+  }
+};

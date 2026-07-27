@@ -67,7 +67,6 @@ export const createAuditLog = async (data: {
   before?: object | null;
   after?: object | null;
   ipAddress: string;
-
 }) => {
   await db("audit_log").insert({
     admin_id: data.adminId,
@@ -77,6 +76,21 @@ export const createAuditLog = async (data: {
     before: data.before ?? null,
     after: data.after ?? null,
     ip_address: data.ipAddress,
-  
   });
+};
+
+export const getUsers = async () => {
+  const rows = await db("users")
+    .select(
+      "id",
+      "first_name",
+      "last_name",
+      "email",
+      "role",
+      "status",
+      "created_at",
+    )
+    .orderBy("created_at", "desc");
+
+  return { rows };
 };
