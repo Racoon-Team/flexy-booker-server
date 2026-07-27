@@ -4,6 +4,7 @@ import {
   createUser as createUserRepository,
   findUserByEmail,
   createAuditLog,
+  getUsers as getUsersRepository,
 } from "./users.repository";
 import { AppError } from "../../utils/AppError";
 import { UserRole } from "./users.model";
@@ -60,4 +61,10 @@ export const createUser = async (data: CreateUserServiceParams) => {
   }
 
   return createdUser;
+};
+
+export const getUsers = async () => {
+    const result = await getUsersRepository();
+
+    return result.rows;
 };
